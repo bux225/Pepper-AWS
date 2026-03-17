@@ -1,7 +1,7 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { handleCallback } from '@/lib/auth';
-import { loadConfig } from '@/lib/config.node';
+import { handleCallback, decodeOAuthState } from '@/lib/auth';
+import { getAccountById } from '@/lib/config.node';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
@@ -23,26 +23,30 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const config = loadConfig();
-  const microsoftAccounts = config.accounts.filter(a => a.provider === 'microsoft');
-
-  let handled = false;
-  for (const account of microsoftAccounts) {
-    try {
-      await handleCallback(code, state, account);
-      logger.info({ name: account.name }, 'Token exchange successful');
-      handled = true;
-      break;
-    } catch (err) {
-      logger.debug({ name: account.name, err: err instanceof Error ? err.message : String(err) }, 'Token exchange failed');
-    }
-  }
-
-  if (!handled) {
+  // Decode state to find the target account directly
+  const decoded = decodeOAuthState(state);
+  if (!decoded) {
     return NextResponse.redirect(
-      new URL('/?settings=true&authError=OAuth+state+mismatch', request.url),
+      new URL('/?settings=true&authError=Invalid+OAuth+state', request.url),
     );
   }
 
-  return NextResponse.redirect(new URL('/?settings=true&authSuccess=true', request.url));
+  const account = getAccountById(decoded.accountId);
+  if (!account || account.provider !== 'microsoft') {
+    return NextResponse.redirect(
+      new URL('/?settings=true&authError=Account+not+found', request.url),
+    );
+  }
+
+  try {
+    await handleCallback(code, state, account);
+    logger.info({ name: account.name }, 'Token exchange successful');
+    return NextResponse.redirect(new URL('/?settings=true&authSuccess=true', request.url));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error({ name: account.name, err: msg }, 'Token exchange failed');
+    return NextResponse.redirect(
+      new URL(`/?settings=true&authError=${encodeURIComponent(msg)}`, request.url),
+    );
+  }
 }

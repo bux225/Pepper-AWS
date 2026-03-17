@@ -42,6 +42,11 @@ function decodeState(state: string): { accountId: string; verifier: string } | n
   }
 }
 
+/** Public wrapper for use in callback route to decode state before calling handleCallback */
+export function decodeOAuthState(state: string): { accountId: string; verifier: string } | null {
+  return decodeState(state);
+}
+
 export async function getAuthUrl(account: AccountConfig): Promise<{ url: string; state: string }> {
   msalApps.delete(account.id);
   const app = getMsalApp(account);
@@ -69,6 +74,9 @@ export async function handleCallback(
     throw new Error('Invalid OAuth state');
   }
 
+  // Always create a fresh MSAL app for callback to avoid stale instance issues
+  // (the in-memory cache may be cleared between login redirect and callback)
+  msalApps.delete(account.id);
   const app = getMsalApp(account);
   const result = await app.acquireTokenByCode({
     code,
