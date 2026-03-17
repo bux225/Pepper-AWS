@@ -116,7 +116,7 @@ export async function retrieveAndGenerate(
       type: 'KNOWLEDGE_BASE',
       knowledgeBaseConfiguration: {
         knowledgeBaseId: getKbId(),
-        modelArn: `arn:aws:bedrock:${process.env.AWS_REGION ?? 'us-west-2'}::foundation-model/anthropic.claude-sonnet-4-20250514-v1:0`,
+        modelArn: `arn:aws:bedrock:us-west-2:521733610452:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0`,
       },
     },
     ...(sessionId ? { sessionId } : {}),

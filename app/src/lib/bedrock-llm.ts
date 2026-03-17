@@ -6,7 +6,7 @@ import logger from './logger';
 
 const client = new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-west-2' });
 
-const DEFAULT_MODEL = 'anthropic.claude-sonnet-4-20250514-v1:0';
+const DEFAULT_MODEL = 'us.anthropic.claude-sonnet-4-20250514-v1:0';
 
 export interface LlmMessage {
   role: 'user' | 'assistant';

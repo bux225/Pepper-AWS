@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:bedrock": "node scripts/test-bedrock.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-agent": "^3.713.0",
