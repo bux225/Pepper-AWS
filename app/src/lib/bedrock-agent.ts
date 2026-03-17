@@ -83,7 +83,7 @@ export async function* invokeAgent(
         yield {
           type: 'action',
           action: {
-            actionGroup: invocation.actionGroupName ?? '',
+                   actionGroup: invocation.actionGroup ?? '',
             function: invocation.function ?? '',
             parameters: params,
             invocationId: event.returnControl.invocationId ?? '',
@@ -157,7 +157,7 @@ export async function* continueAgent(
         yield {
           type: 'action',
           action: {
-            actionGroup: invocation.actionGroupName ?? '',
+            actionGroup: invocation.actionGroup ?? '',
             function: invocation.function ?? '',
             parameters: params,
             invocationId: event.returnControl.invocationId ?? '',

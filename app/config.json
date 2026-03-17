@@ -1,5 +1,20 @@
 {
-  "accounts": [],
+  "accounts": [
+    {
+      "id": "92c718d3-087e-4a23-b615-37598f6415a5",
+      "name": "BD M365",
+      "provider": "microsoft",
+      "clientId": "4aaf6921-aeb9-4e02-a32f-d674c42ee111",
+      "tenantId": "94c3e67c-9e2d-4800-a6b7-635d97882165",
+      "scopes": [
+        "Mail.Read",
+        "Chat.Read",
+        "User.Read"
+      ],
+      "envKey": "MS_CLIENT_SECRET",
+      "enabled": true
+    }
+  ],
   "polling": {
     "emailIntervalSeconds": 300,
     "teamsIntervalSeconds": 300

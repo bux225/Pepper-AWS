@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { loadConfig, saveConfig } from '@/lib/config';
 import { createAccountSchema } from '@/lib/validation';

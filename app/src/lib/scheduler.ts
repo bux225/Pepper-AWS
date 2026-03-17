@@ -1,5 +1,5 @@
 import cron, { type ScheduledTask } from 'node-cron';
-import { loadConfig } from './config';
+import { loadConfig } from './config.node';
 import logger from './logger';
 
 const log = logger.child({ module: 'scheduler' });

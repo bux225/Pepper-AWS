@@ -149,11 +149,11 @@ export default function DigestPanel() {
           </div>
 
           {/* Highlights */}
-          {digest.highlights.length > 0 && (
+          {Array.isArray(digest.highlights) && digest.highlights.length > 0 && (
             <div>
               <h3 className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Recent Highlights</h3>
               <div className="space-y-1">
-                {digest.highlights.map(h => (
+                {digest.highlights?.map(h => (
                   <div key={h.s3Key} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800">
                     <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
                       {h.source}
