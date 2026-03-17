@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { loadConfig, saveConfig } from '@/lib/config';
+import { settingsSchema } from '@/lib/validation';
+import { rateLimit } from '@/lib/rate-limit';
+
+export async function GET(request: NextRequest) {
+  const limited = rateLimit(request, 30, 60_000);
+  if (limited) return limited;
+
+  const config = loadConfig();
+  return NextResponse.json(config);
+}
+
+export async function PATCH(request: NextRequest) {
+  const limited = rateLimit(request, 10, 60_000);
+  if (limited) return limited;
+
+  const body = await request.json();
+  const parsed = settingsSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const config = loadConfig();
+  if (parsed.data.review) {
+    config.review = { ...config.review, ...parsed.data.review };
+  }
+  saveConfig(config);
+  return NextResponse.json({ ok: true });
+}

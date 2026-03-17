@@ -1,0 +1,10 @@
+{
+  "accounts": [],
+  "polling": {
+    "emailIntervalSeconds": 300,
+    "teamsIntervalSeconds": 300
+  },
+  "review": {
+    "emailRulesText": ""
+  }
+}
