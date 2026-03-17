@@ -41,6 +41,7 @@ export default function TodoPanel() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [scanning, setScanning] = useState(false);
 
   // Follow-ups state
   const [followUps, setFollowUps] = useState<Array<{
@@ -189,6 +190,19 @@ export default function TodoPanel() {
     }
   };
 
+  const scanNow = async () => {
+    setScanning(true);
+    try {
+      await Promise.all([
+        fetch('/api/todos/extract', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } }),
+        fetch('/api/follow-ups', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } }),
+      ]);
+      await Promise.all([fetchTodos(), fetchFollowUps()]);
+    } catch { /* silent */ } finally {
+      setScanning(false);
+    }
+  };
+
   const openTodos = todos.filter(t => t.status === 'open');
 
   return (
@@ -221,8 +235,16 @@ export default function TodoPanel() {
             </button>
           ))}
           <button
+            onClick={scanNow}
+            disabled={scanning}
+            className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            title="Scan emails for todos & follow-ups"
+          >
+            {scanning ? 'Scanning…' : '⟳ Scan'}
+          </button>
+          <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="ml-2 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700"
+            className="rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700"
           >
             + Add
           </button>

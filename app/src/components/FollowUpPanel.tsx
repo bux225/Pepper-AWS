@@ -17,6 +17,7 @@ export default function FollowUpPanel() {
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'waiting' | 'resolved' | 'dismissed'>('waiting');
+  const [scanning, setScanning] = useState(false);
 
   const fetchFollowUps = useCallback(async () => {
     setLoading(true);
@@ -59,6 +60,22 @@ export default function FollowUpPanel() {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              setScanning(true);
+              try {
+                await fetch('/api/follow-ups', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } });
+                await fetchFollowUps();
+              } catch { /* silent */ } finally {
+                setScanning(false);
+              }
+            }}
+            disabled={scanning}
+            className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            title="Scan emails for follow-ups now"
+          >
+            {scanning ? 'Scanning…' : '⟳ Scan'}
+          </button>
           {(['waiting', 'resolved', 'dismissed'] as const).map(s => (
             <button
               key={s}

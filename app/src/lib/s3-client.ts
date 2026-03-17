@@ -1,6 +1,7 @@
 import {
   S3Client,
   PutObjectCommand,
+  GetObjectCommand,
   ListObjectsV2Command,
   DeleteObjectCommand,
   HeadObjectCommand,
@@ -85,6 +86,23 @@ export async function objectExists(key: string): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Get a JSON document from S3.
+ */
+export async function getDocument<T = unknown>(key: string): Promise<T | null> {
+  const bucket = getBucket();
+  try {
+    const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const body = await response.Body?.transformToString();
+    if (!body) return null;
+    return JSON.parse(body) as T;
+  } catch (err: unknown) {
+    const code = (err as { name?: string }).name;
+    if (code === 'NoSuchKey') return null;
+    throw err;
   }
 }
 

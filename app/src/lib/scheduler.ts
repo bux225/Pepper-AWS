@@ -84,6 +84,10 @@ export function startScheduler(): void {
   tasks.push(cron.schedule('*/15 * * * *', () => { triggerPoll('/api/follow-ups'); }));
   log.info('Scheduled follow-up detection every 15 minutes');
 
+  // Todo extraction — every 15 minutes
+  tasks.push(cron.schedule('*/15 * * * *', () => { triggerPoll('/api/todos/extract'); }));
+  log.info('Scheduled todo extraction every 15 minutes');
+
   globalForScheduler.__schedulerRunning = true;
   globalForScheduler.__schedulerTasks = tasks;
   log.info('Background scheduler started');
