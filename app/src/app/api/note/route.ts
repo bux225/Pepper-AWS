@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { ingestNote } from '@/lib/s3-ingest';
 import { syncKnowledgeBase } from '@/lib/s3-ingest';

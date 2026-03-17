@@ -1,5 +1,6 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { loadConfig, saveConfig } from '@/lib/config';
+import { loadConfig, saveConfig } from '@/lib/config.node';
 import { settingsSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rate-limit';
 

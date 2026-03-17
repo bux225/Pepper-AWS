@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateDigest, saveDigest, getLatestDigest } from '@/lib/digest';
 import { rateLimit } from '@/lib/rate-limit';

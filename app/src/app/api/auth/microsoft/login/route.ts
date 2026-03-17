@@ -1,6 +1,7 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUrl } from '@/lib/auth';
-import { getAccountById } from '@/lib/config';
+import { getAccountById } from '@/lib/config.node';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {

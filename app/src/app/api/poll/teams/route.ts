@@ -1,5 +1,6 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { getEnabledAccounts } from '@/lib/config';
+import { getEnabledAccounts } from '@/lib/config.node';
 import { pollTeams } from '@/lib/adapters/teams';
 import { rateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';

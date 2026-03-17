@@ -1,6 +1,7 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { handleCallback } from '@/lib/auth';
-import { loadConfig } from '@/lib/config';
+import { loadConfig } from '@/lib/config.node';
 import logger from '@/lib/logger';
 
 export async function GET(request: NextRequest) {

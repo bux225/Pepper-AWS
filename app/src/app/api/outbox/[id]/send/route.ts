@@ -1,6 +1,7 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getOutboxItemById, updateOutboxStatus } from '@/lib/outbox';
-import { getEnabledAccounts } from '@/lib/config';
+import { getEnabledAccounts } from '@/lib/config.node';
 import { sendEmail, sendTeamsMessage } from '@/lib/adapters/send';
 import { rateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';

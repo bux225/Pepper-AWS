@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createTodo, listTodos, countTodos } from '@/lib/todos';
 import { createTodoSchema, todoQuerySchema } from '@/lib/validation';

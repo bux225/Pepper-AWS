@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest } from 'next/server';
 import { chatSchema } from '@/lib/validation';
 import { invokeAgent, continueAgent, type AgentChunk } from '@/lib/bedrock-agent';

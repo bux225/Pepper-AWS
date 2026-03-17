@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { createOutboxItem, listOutboxItems, countOutboxItems } from '@/lib/outbox';
 import { outboxCreateSchema } from '@/lib/validation';

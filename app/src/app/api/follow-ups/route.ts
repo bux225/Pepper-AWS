@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { listFollowUps, updateFollowUpStatus, countFollowUps } from '@/lib/follow-ups';
 import { rateLimit } from '@/lib/rate-limit';

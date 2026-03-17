@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { listSessions, createSession, deleteSession } from '@/lib/chat-history';
 import { rateLimit } from '@/lib/rate-limit';

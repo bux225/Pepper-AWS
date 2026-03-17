@@ -1,9 +1,10 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { loadConfig, saveConfig } from '@/lib/config';
+import { loadConfig, saveConfig } from '@/lib/config.node';
 import { createAccountSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rate-limit';
 import { randomUUID } from 'crypto';
+import { getToken } from '@/lib/tokens';
 
 export async function GET(request: NextRequest) {
   const limited = rateLimit(request, 30, 60_000);
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     clientId: a.clientId,
     scopes: a.scopes,
     enabled: a.enabled,
-    connected: false, // TODO: check token presence
+    connected: !!getToken(a.id), // check token presence
   }));
   return NextResponse.json({ accounts });
 }
