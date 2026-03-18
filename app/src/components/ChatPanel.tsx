@@ -72,6 +72,7 @@ export default function ChatPanel({ onAction, onCollapse, onExpand, isExpanded }
   const [citations, setCitations] = useState<Citation[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Session state
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -155,10 +156,13 @@ export default function ChatPanel({ onAction, onCollapse, onExpand, isExpanded }
 
     try {
       const sessionParam = activeSessionId ? `?sessionId=${encodeURIComponent(activeSessionId)}` : '';
+      const controller = new AbortController();
+      abortRef.current = controller;
       const res = await fetch(`/api/chat${sessionParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: trimmed }),
+        signal: controller.signal,
       });
 
       if (!res.ok) throw new Error(`Chat failed (${res.status})`);
@@ -246,9 +250,14 @@ export default function ChatPanel({ onAction, onCollapse, onExpand, isExpanded }
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
-      setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${errorMessage}` }]);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setMessages(prev => [...prev, { role: 'assistant', content: '⏹ Stopped.' }]);
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Something went wrong';
+        setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${errorMessage}` }]);
+      }
     } finally {
+      abortRef.current = null;
       setStreaming(false);
       inputRef.current?.focus();
       if (triggeredAction) onAction?.();
@@ -429,13 +438,13 @@ export default function ChatPanel({ onAction, onCollapse, onExpand, isExpanded }
           />
           <button
             type="submit"
-            disabled={streaming || !input.trim()}
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            disabled={!streaming && !input.trim()}
+            onClick={streaming ? (e) => { e.preventDefault(); abortRef.current?.abort(); } : undefined}
+            className={`rounded-xl px-4 py-2 text-sm font-medium text-white ${streaming ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'} disabled:opacity-50`}
           >
             {streaming ? (
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="6" width="12" height="12" rx="1" />
               </svg>
             ) : (
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

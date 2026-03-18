@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
 
       try {
         let fullResponse = '';
+        const MAX_ROC_DEPTH = 15;
+        let rocCount = 0;
 
         // Process agent stream, handling ROC loops
         async function processStream(chunks: AsyncGenerator<AgentChunk>) {
@@ -66,6 +68,14 @@ export async function POST(request: NextRequest) {
                 break;
 
               case 'action': {
+                rocCount++;
+                if (rocCount > MAX_ROC_DEPTH) {
+                  logger.warn({ sessionId: chatSessionId, rocCount }, 'ROC loop limit reached');
+                  send('text', { content: '\n\n⚠️ Too many tool calls — stopping to prevent an infinite loop.', sessionId: chatSessionId });
+                  fullResponse += '\n\n⚠️ Too many tool calls — stopping to prevent an infinite loop.';
+                  return;
+                }
+
                 send('action', {
                   function: chunk.action.function,
                   parameters: chunk.action.parameters,

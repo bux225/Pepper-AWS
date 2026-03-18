@@ -152,16 +152,16 @@ export default function KnowledgeBase() {
         </div>
       </main>
 
-      {/* Chat panel */}
+      {/* Chat panel — always mounted to preserve state */}
       <div className={`${chatWidthClass} flex-shrink-0 overflow-hidden border-l border-zinc-200 bg-white transition-all duration-200 dark:border-zinc-800 dark:bg-zinc-900 ${chatState === 'collapsed' ? 'border-l-0' : ''}`}>
-        {chatState !== 'collapsed' && (
+        <div className={chatState === 'collapsed' ? 'hidden' : 'h-full'}>
           <ChatPanel
             onAction={handleChatAction}
             onCollapse={collapseChat}
             onExpand={expandChat}
             isExpanded={chatState === 'expanded'}
           />
-        )}
+        </div>
       </div>
     </div>
   );

@@ -66,11 +66,23 @@ async function handleSearchKnowledge(params: Record<string, string>): Promise<st
   });
 }
 
+/** Safely parse a JSON array string, falling back to comma-split for unquoted values */
+function safeParseArray(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.map(String);
+  } catch {
+    // Agent may send unquoted values like [dispensing, cloud, personnel]
+  }
+  // Strip brackets and split by comma
+  return value.replace(/^\[|\]$/g, '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
 async function handleCreateNote(params: Record<string, string>): Promise<string> {
   const args = toolCreateNoteArgs.parse({
     title: params.title,
     content: params.content,
-    tags: params.tags ? JSON.parse(params.tags) : undefined,
+    tags: params.tags ? safeParseArray(params.tags) : undefined,
   });
 
   const s3Key = await ingestNote(args);
@@ -79,7 +91,7 @@ async function handleCreateNote(params: Record<string, string>): Promise<string>
 
 function handleDraftEmail(params: Record<string, string>): string {
   const args = toolDraftEmailArgs.parse({
-    to: params.to ? JSON.parse(params.to) : undefined,
+    to: params.to ? safeParseArray(params.to) : undefined,
     subject: params.subject,
     body: params.body,
   });
