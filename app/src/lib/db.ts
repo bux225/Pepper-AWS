@@ -272,7 +272,16 @@ const migrations = [
     `,
   },
   {
-    name: '012_enhance_urls_for_reference_links',
+    name: '012_create_todo_scan_log',
+    sql: `
+      CREATE TABLE todo_scan_log (
+        s3_key TEXT PRIMARY KEY,
+        scanned_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `,
+  },
+  {
+    name: '013_enhance_urls_for_reference_links',
     sql: `
       CREATE TABLE urls_new (
         id TEXT PRIMARY KEY,

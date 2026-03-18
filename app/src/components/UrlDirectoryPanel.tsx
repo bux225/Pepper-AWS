@@ -73,6 +73,7 @@ export default function UrlDirectoryPanel() {
 
   const handleSyncOneDrive = async () => {
     setSyncing(true);
+    setError('');
     try {
       const res = await fetch('/api/urls', {
         method: 'POST',
@@ -80,6 +81,10 @@ export default function UrlDirectoryPanel() {
         body: JSON.stringify({ action: 'sync-onedrive' }),
       });
       if (!res.ok) throw new Error(`Sync failed (${res.status})`);
+      const data = await res.json();
+      if (data.errors?.length > 0) {
+        setError(data.errors.join('; '));
+      }
       await fetchLinks();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sync failed');

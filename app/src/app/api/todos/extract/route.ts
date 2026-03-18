@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       `SELECT s3_key, source_type FROM sync_journal
        WHERE source_type IN ('email', 'teams')
        AND uploaded_at >= ?
-       AND s3_key NOT IN (SELECT source_doc_id FROM todos WHERE source_doc_id IS NOT NULL)
+       AND s3_key NOT IN (SELECT s3_key FROM todo_scan_log)
        ORDER BY uploaded_at DESC LIMIT 20`
     ).all(cutoff.toISOString()) as { s3_key: string; source_type: string }[];
 
@@ -119,6 +119,12 @@ export async function POST(request: NextRequest) {
         status: 'suggested',
       });
       created++;
+    }
+
+    // Mark ALL scanned docs so they are never re-scanned, even if no todos were extracted
+    const insertScan = db.prepare('INSERT OR IGNORE INTO todo_scan_log (s3_key) VALUES (?)');
+    for (const doc of docSummaries) {
+      insertScan.run(doc.id);
     }
 
     logger.info({ scanned: docSummaries.length, created }, 'Todo extraction completed');

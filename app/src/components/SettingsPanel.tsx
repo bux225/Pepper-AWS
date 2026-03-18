@@ -256,16 +256,24 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                    {account.tenantId === 'consumers' ? 'Personal' : account.tenantId} · {account.scopes.some(s => s.includes('Write')) ? 'Read/Write' : 'Read-only'}
+                    {account.tenantId === 'consumers' ? 'Personal' : account.tenantId} · {account.scopes.join(', ')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {!account.connected && (
+                  {!account.connected ? (
                     <button
                       onClick={() => connectAccount(account.id)}
                       className="rounded-lg px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
                     >
                       Connect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => connectAccount(account.id)}
+                      className="rounded-lg px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                      title="Re-authenticate to pick up scope changes"
+                    >
+                      Reconnect
                     </button>
                   )}
                   <button
