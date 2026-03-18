@@ -206,67 +206,72 @@ async function main() {
   // Searches ALL content you can access: your OneDrive, SharePoint, shared files.
   // This is the recommended modern approach.
   // Requires Files.Read.All scope (already configured).
+  // Now uses KQL date filter + pagination.
   // ========================================
   console.log(`\n${'━'.repeat(50)}`);
   console.log(yellow(' APPROACH 3: POST /search/query (Microsoft Search API)'));
   console.log(dim(' Scope: ALL accessible content — your OneDrive + SharePoint + shared.'));
-  console.log(dim(' Recommended approach. Uses Files.Read.All.'));
+  console.log(dim(' Uses KQL lastModifiedTime filter + pagination (25/page).'));
   console.log('━'.repeat(50));
 
+  const SEARCH_LOOKBACK_DAYS = 30;
+  const SEARCH_LIMIT = 100;
+
   try {
-    const searchBody = {
-      requests: [{
-        entityTypes: ['driveItem'],
-        query: { queryString: '*' },
-        from: 0,
-        size: 50,
-      }],
-    };
-    const data = await graphPost(token, '/search/query', searchBody);
+    const since = new Date(Date.now() - SEARCH_LOOKBACK_DAYS * 86400000);
+    const sinceStr = since.toISOString().slice(0, 10);
+    const kql = `lastModifiedTime>=${sinceStr}`;
+    console.log(dim(`  KQL: ${kql}  |  limit: ${SEARCH_LIMIT}`));
 
-    const hitsContainer = data.value?.[0]?.hitsContainers?.[0];
-    const total = hitsContainer?.total || 0;
-    const moreAvailable = hitsContainer?.moreResultsAvailable || false;
-    const hits = hitsContainer?.hits || [];
+    const allItems = [];
+    let from = 0;
+    let totalAvailable = 0;
+    const PAGE_SIZE = 25;
 
-    pass(`Returned ${hits.length} hits`, `total available: ${total}${moreAvailable ? '+' : ''}`);
+    while (allItems.length < SEARCH_LIMIT) {
+      const searchBody = {
+        requests: [{
+          entityTypes: ['driveItem'],
+          query: { queryString: kql },
+          from,
+          size: PAGE_SIZE,
+        }],
+      };
+      const data = await graphPost(token, '/search/query', searchBody);
+      const container = data.value?.[0]?.hitsContainers?.[0];
+      if (!container) break;
 
-    // Extract drive items from search hits and classify
-    const searchFiles = hits.map(h => h.resource).filter(Boolean);
-    const { owned: searchOwned, shared: searchShared } = classify(searchFiles, myDriveId, myUserId);
+      totalAvailable = container.total || 0;
+      const hits = container.hits || [];
+      if (hits.length === 0) break;
+
+      allItems.push(...hits.map(h => h.resource));
+      process.stdout.write(dim(`  fetched ${allItems.length}/${totalAvailable}...\r`));
+
+      if (!container.moreResultsAvailable) break;
+      from += hits.length;
+    }
+    console.log(); // clear progress line
+
+    pass(`Fetched ${allItems.length} items`, `${totalAvailable} total match KQL filter`);
+
+    const { owned: searchOwned, shared: searchShared } = classify(allItems, myDriveId, myUserId);
     console.log(`  Classified: ${searchOwned.length} owned, ${searchShared.length} shared`);
 
-    // Filter owned to /Documents
-    const docsOnly = searchOwned.filter(f => {
-      const path = f.parentReference?.path || '';
-      return path.includes('/Documents');
-    });
-    console.log(`  Owned in /Documents: ${docsOnly.length}`);
-
-    console.log(`\n  ${green('── Owned files (in /Documents) ──')}`);
-    if (docsOnly.length === 0) {
-      console.log('  (none found)');
+    console.log(`\n  ${green('── Owned files from Search API ──')} (up to ${SHOW})`);
+    if (searchOwned.length === 0) {
+      console.log('  (none found — expected, Approach 1 covers these)');
     } else {
-      docsOnly.slice(0, SHOW).forEach(printItem);
+      searchOwned.slice(0, SHOW).forEach(printItem);
     }
 
-    const ownedOutsideDocs = searchOwned.filter(f => {
-      const path = f.parentReference?.path || '';
-      return !path.includes('/Documents');
-    });
-    if (ownedOutsideDocs.length > 0) {
-      console.log(`\n  ${yellow('── Owned files OUTSIDE /Documents (excluded) ──')}`);
-      ownedOutsideDocs.slice(0, SHOW).forEach(printItem);
-    }
-
-    console.log(`\n  ${green('── Shared files ──')}`);
+    console.log(`\n  ${green('── Shared files from Search API ──')} (up to ${SHOW})`);
     if (searchShared.length === 0) {
       console.log('  (none found)');
     } else {
       searchShared.slice(0, SHOW).forEach(printItem);
     }
 
-    // Dump raw classification signals for first few shared files for debugging
     if (searchShared.length > 0) {
       console.log(`\n  ${dim('── Classification signals (first 3 shared) ──')}`);
       searchShared.slice(0, 3).forEach((item, i) => {
@@ -285,11 +290,11 @@ async function main() {
   // SUMMARY
   // ========================================
   console.log(`\n${'='.repeat(50)}`);
-  console.log(' RECOMMENDATION:');
-  console.log(' Use /search/query (Approach 3) for shared files.');
-  console.log(' It searches across all M365 content you can access.');
-  console.log(' Combine with /me/drive/root/search for owned files');
-  console.log(' if search API doesn\'t surface your own drive well.');
+  console.log(' HYBRID APPROACH (what the app now uses):');
+  console.log(' • Owned files:  /me/drive/root/search (Approach 1)');
+  console.log(' • Shared files: /search/query + KQL date filter (Approach 3)');
+  console.log('   → classify by driveId ≠ myDriveId');
+  console.log(`   → lookback: ${SEARCH_LOOKBACK_DAYS} days, limit: ${SEARCH_LIMIT}`);
   console.log('='.repeat(50));
 }
 

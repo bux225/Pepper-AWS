@@ -302,6 +302,67 @@ export async function searchFiles(account: AccountConfig, query: string, limit =
 }
 
 /**
+ * Search for recently-modified files across all M365 content the user can access.
+ * Uses the Microsoft Search API with a KQL date filter to keep results manageable.
+ * Returns items along with the total available count.
+ */
+export async function searchRecentFiles(
+  account: AccountConfig,
+  sinceDaysAgo = 30,
+  limit = 200,
+): Promise<{ items: GraphDriveItem[]; total: number }> {
+  const since = new Date(Date.now() - sinceDaysAgo * 86400_000);
+  const sinceStr = since.toISOString().slice(0, 10); // YYYY-MM-DD
+  const kql = `lastModifiedTime>=${sinceStr}`;
+
+  const allItems: GraphDriveItem[] = [];
+  let from = 0;
+  let total = 0;
+  const pageSize = Math.min(limit, 25); // Search API max per request is 25
+
+  while (allItems.length < limit) {
+    const body = {
+      requests: [{
+        entityTypes: ['driveItem'],
+        query: { queryString: kql },
+        from,
+        size: pageSize,
+        fields: ['name', 'webUrl', 'parentReference', 'createdBy', 'lastModifiedDateTime', 'size', 'file', 'folder'],
+      }],
+    };
+
+    const token = await getAccessToken(account);
+    const res = await fetch(`${GRAPH_BASE}/search/query`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => '');
+      throw new Error(`Graph Search API ${res.status}: ${res.statusText} — ${errBody}`);
+    }
+
+    const data = await res.json() as GraphSearchResponse;
+    const container = data.value?.[0]?.hitsContainers?.[0];
+    if (!container) break;
+
+    total = container.total ?? 0;
+    const hits = container.hits ?? [];
+    if (hits.length === 0) break;
+
+    allItems.push(...hits.map(h => h.resource));
+    if (!container.moreResultsAvailable) break;
+    from += hits.length;
+  }
+
+  return { items: allItems.slice(0, limit), total };
+}
+
+/**
  * Fetch file metadata from a OneDrive/SharePoint URL using the /shares API.
  */
 export async function fetchFileMetadataFromUrl(account: AccountConfig, url: string): Promise<GraphDriveItem | null> {

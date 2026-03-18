@@ -3,6 +3,7 @@ import { getDb } from './db';
 import { normalizeUrl, extractUrls } from './text';
 import {
   searchDriveFiles,
+  searchRecentFiles,
   fetchMyDriveId,
   fetchMyUserId,
   classifyDriveFiles,
@@ -220,6 +221,8 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
   let imported = 0;
   const errors: string[] = [];
+  const SHARED_LOOKBACK_DAYS = 30;
+  const SHARED_LIMIT = 200;
 
   for (const account of accounts) {
     try {
@@ -229,16 +232,13 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
         fetchMyUserId(account),
       ]);
 
-      // Search all files and classify ownership
-      const allFiles = await searchDriveFiles(account, 200);
-      const { owned, shared } = classifyDriveFiles(allFiles, myDriveId, myUserId);
+      // --- Owned files: /me/drive/root/search(q='') ---
+      // This only searches your own OneDrive, so all results are owned.
+      const ownedFiles = await searchDriveFiles(account, 200);
+      let ownedImported = 0;
 
-      // Owned files: only include items under /Documents path (skip folders)
-      for (const item of owned) {
+      for (const item of ownedFiles) {
         if (!item.webUrl || item.folder) continue;
-        const parentPath = (item.parentReference?.path ?? '').toLowerCase();
-        if (!parentPath.includes('/documents')) continue;
-
         const id = upsertUrl({
           url: item.webUrl,
           title: item.name || item.webUrl,
@@ -247,10 +247,21 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
           sourceType: 'onedrive',
           status: 'confirmed',
         });
-        if (id) imported++;
+        if (id) ownedImported++;
       }
 
-      // Shared files: include all non-folder items
+      // --- Shared files: Search API with date filter ---
+      // Searches all M365 content, then filters to items NOT on your drive.
+      const { items: searchResults, total: searchTotal } = await searchRecentFiles(
+        account,
+        SHARED_LOOKBACK_DAYS,
+        SHARED_LIMIT,
+      );
+
+      // Classify to extract only shared items (driveId ≠ mine)
+      const { shared } = classifyDriveFiles(searchResults, myDriveId, myUserId);
+      let sharedImported = 0;
+
       for (const item of shared) {
         const resolved = item.remoteItem ?? item;
         if (!resolved.webUrl || resolved.folder) continue;
@@ -262,10 +273,14 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
           sourceType: 'onedrive-shared',
           status: 'confirmed',
         });
-        if (id) imported++;
+        if (id) sharedImported++;
       }
 
-      log.info({ owned: owned.length, shared: shared.length, imported }, 'OneDrive classification complete');
+      imported += ownedImported + sharedImported;
+      log.info(
+        { owned: ownedFiles.length, shared: shared.length, searchTotal, ownedImported, sharedImported },
+        'OneDrive sync complete',
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       errors.push(`OneDrive sync for "${account.name}": ${msg}`);
