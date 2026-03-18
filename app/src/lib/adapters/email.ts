@@ -1,7 +1,7 @@
 import { fetchEmails, type GraphEmail } from '../graph';
 import { ingestEmail, type EmailDoc } from '../s3-ingest';
 import { extractPeopleFromDoc } from '../people';
-import { extractAndRecommendUrls } from '../reference-links';
+// import { extractAndRecommendUrls } from '../reference-links';
 import { getWatermark, upsertWatermark } from '../tokens';
 import { loadConfig } from '../config.node';
 import logger from '../logger';
@@ -138,8 +138,8 @@ export async function pollEmails(
           email.from?.emailAddress?.address,
           (email.toRecipients ?? []).map(r => r.emailAddress?.address).filter(Boolean),
         );
-        // Extract URLs as recommended reference links
-        extractAndRecommendUrls(plainContent, 'email', s3Key);
+        // URL extraction disabled — OneDrive shared files covers this
+        // extractAndRecommendUrls(plainContent, 'email', s3Key);
         imported++;
       }
     } catch (err) {

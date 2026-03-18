@@ -134,8 +134,6 @@ export default function KnowledgeBase() {
           <TodoPanel key={refreshKey} />
         ) : viewMode === 'urls' ? (
           <UrlDirectoryPanel key={refreshKey} />
-        ) : viewMode === 'digest' ? (
-          <DigestPanel key={refreshKey} />
         ) : viewMode === 'people' ? (
           <PeoplePanel key={refreshKey} />
         ) : viewMode === 'outbox' ? (
@@ -148,6 +146,10 @@ export default function KnowledgeBase() {
             onCancel={() => setViewMode('todos')}
           />
         ) : null}
+        {/* DigestPanel stays mounted to preserve state across tab switches */}
+        <div className={viewMode === 'digest' ? 'h-full' : 'hidden'}>
+          <DigestPanel key={refreshKey} />
+        </div>
       </main>
 
       {/* Chat panel */}

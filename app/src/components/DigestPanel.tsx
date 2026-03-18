@@ -58,7 +58,7 @@ export default function DigestPanel() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
+    <div className="mx-auto h-full max-w-2xl overflow-y-auto p-6">
       <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Daily Digest</h2>
       <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
         AI-generated summary of your recent knowledge base activity.
@@ -77,7 +77,7 @@ export default function DigestPanel() {
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
               }`}
             >
-              {d === 1 ? 'Today' : `${d} days`}
+              {d === 1 ? 'Yesterday' : `${d} days`}
             </button>
           ))}
         </div>

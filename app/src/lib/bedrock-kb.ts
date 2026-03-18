@@ -12,8 +12,11 @@ import {
 } from '@aws-sdk/client-bedrock-agent-runtime';
 import logger from './logger';
 
-const agentClient = new BedrockAgentClient({ region: process.env.AWS_REGION ?? 'us-west-2' });
-const runtimeClient = new BedrockAgentRuntimeClient({ region: process.env.AWS_REGION ?? 'us-west-2' });
+const REGION = process.env.AWS_REGION ?? 'us-west-2';
+const RAG_MODEL = process.env.BEDROCK_RAG_MODEL ?? 'us.anthropic.claude-sonnet-4-20250514-v1:0';
+
+const agentClient = new BedrockAgentClient({ region: REGION });
+const runtimeClient = new BedrockAgentRuntimeClient({ region: REGION });
 
 function getKbId(): string {
   const id = process.env.BEDROCK_KB_ID;
@@ -116,7 +119,7 @@ export async function retrieveAndGenerate(
       type: 'KNOWLEDGE_BASE',
       knowledgeBaseConfiguration: {
         knowledgeBaseId: getKbId(),
-        modelArn: `arn:aws:bedrock:us-west-2:521733610452:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0`,
+        modelArn: RAG_MODEL,
       },
     },
     ...(sessionId ? { sessionId } : {}),
