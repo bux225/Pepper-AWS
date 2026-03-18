@@ -1,7 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from './db';
 import { normalizeUrl, extractUrls } from './text';
-import { fetchRecentFiles, fetchSharedWithMe, type GraphDriveItem } from './graph';
+import {
+  searchDriveFiles,
+  fetchMyDriveId,
+  fetchMyUserId,
+  classifyDriveFiles,
+  type GraphDriveItem,
+} from './graph';
 import { getEnabledAccounts } from './config.node';
 import logger from './logger';
 
@@ -217,10 +223,22 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
   for (const account of accounts) {
     try {
-      // Fetch personal recents
-      const recents = await fetchRecentFiles(account);
-      for (const item of recents) {
+      // Get user identity for ownership classification
+      const [myDriveId, myUserId] = await Promise.all([
+        fetchMyDriveId(account),
+        fetchMyUserId(account),
+      ]);
+
+      // Search all files and classify ownership
+      const allFiles = await searchDriveFiles(account, 200);
+      const { owned, shared } = classifyDriveFiles(allFiles, myDriveId, myUserId);
+
+      // Owned files: only include items under /Documents path (skip folders)
+      for (const item of owned) {
         if (!item.webUrl || item.folder) continue;
+        const parentPath = (item.parentReference?.path ?? '').toLowerCase();
+        if (!parentPath.includes('/documents')) continue;
+
         const id = upsertUrl({
           url: item.webUrl,
           title: item.name || item.webUrl,
@@ -232,8 +250,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
         if (id) imported++;
       }
 
-      // Fetch shared-with-me files
-      const shared = await fetchSharedWithMe(account);
+      // Shared files: include all non-folder items
       for (const item of shared) {
         const resolved = item.remoteItem ?? item;
         if (!resolved.webUrl || resolved.folder) continue;
@@ -247,6 +264,8 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
         });
         if (id) imported++;
       }
+
+      log.info({ owned: owned.length, shared: shared.length, imported }, 'OneDrive classification complete');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       errors.push(`OneDrive sync for "${account.name}": ${msg}`);
@@ -254,7 +273,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
     }
   }
 
-  log.info({ imported }, 'OneDrive recents sync complete');
+  log.info({ imported }, 'OneDrive sync complete');
   return { imported, errors };
 }
 

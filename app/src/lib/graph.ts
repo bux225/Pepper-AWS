@@ -177,9 +177,9 @@ export interface GraphDriveItem {
   size: number;
   file?: { mimeType: string };
   folder?: { childCount: number };
-  createdBy?: { user?: { displayName: string; email?: string } };
+  createdBy?: { user?: { displayName: string; email?: string; id?: string } };
   lastModifiedBy?: { user?: { displayName: string; email?: string } };
-  parentReference?: { path?: string; name?: string };
+  parentReference?: { path?: string; name?: string; driveId?: string };
   remoteItem?: GraphDriveItem;
 }
 
@@ -198,6 +198,66 @@ export async function fetchSharedWithMe(account: AccountConfig): Promise<GraphDr
   const res = await graphFetch(account, '/me/drive/sharedWithMe?$top=200');
   const data = await res.json() as GraphDriveItemResponse;
   return data.value;
+}
+
+export async function fetchMyDriveId(account: AccountConfig): Promise<string> {
+  const res = await graphFetch(account, '/me/drive?$select=id');
+  const data = await res.json() as { id: string };
+  return data.id;
+}
+
+export async function fetchMyUserId(account: AccountConfig): Promise<string> {
+  const res = await graphFetch(account, '/me?$select=id');
+  const data = await res.json() as { id: string };
+  return data.id;
+}
+
+/**
+ * Search all files in the user's OneDrive using the search endpoint.
+ * Returns up to `top` results with fields needed for ownership classification.
+ */
+export async function searchDriveFiles(account: AccountConfig, top = 200): Promise<GraphDriveItem[]> {
+  const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
+  const res = await graphFetch(
+    account,
+    `/me/drive/root/search(q='')?$top=${top}&$select=${encodeURIComponent(select)}`,
+  );
+  const data = await res.json() as GraphDriveItemResponse;
+  return data.value;
+}
+
+/**
+ * Classify files into owned vs shared using the approach from distinguish_onedrive_files.py:
+ * - remoteItem facet → shared
+ * - parentReference.driveId differs from user's driveId → shared
+ * - createdBy.user.id differs from user's id → shared (fallback)
+ */
+export function classifyDriveFiles(
+  files: GraphDriveItem[],
+  myDriveId: string,
+  myUserId: string,
+): { owned: GraphDriveItem[]; shared: GraphDriveItem[] } {
+  const owned: GraphDriveItem[] = [];
+  const shared: GraphDriveItem[] = [];
+
+  for (const item of files) {
+    if (item.remoteItem) {
+      shared.push(item);
+      continue;
+    }
+    if (item.parentReference?.driveId && item.parentReference.driveId !== myDriveId) {
+      shared.push(item);
+      continue;
+    }
+    const creatorId = item.createdBy?.user?.id;
+    if (creatorId && creatorId !== myUserId) {
+      shared.push(item);
+      continue;
+    }
+    owned.push(item);
+  }
+
+  return { owned, shared };
 }
 
 interface GraphSearchResponse {

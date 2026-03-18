@@ -10,7 +10,7 @@
         "Mail.Read",
         "Chat.Read",
         "User.Read",
-        "Files.Read"
+        "Files.Read.All"
       ],
       "envKey": "MS_CLIENT_SECRET",
       "enabled": true
