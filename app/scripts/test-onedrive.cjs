@@ -109,6 +109,8 @@ function printItem(item, idx) {
 }
 
 async function main() {
+
+  const SHOW = 5;
   console.log('=========================================');
   console.log(' OneDrive File Fetch + Classification');
   console.log('=========================================\n');
@@ -173,8 +175,26 @@ async function main() {
   });
   console.log(`  Owned in /Documents: ${docsOnly.length}`);
 
+  // Step 6: Fetch sharedWithMe
+  console.log(`\n${yellow('→')} Fetching /me/drive/sharedWithMe ...`);
+  let sharedWithMe = [];
+  try {
+    const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
+    const data = await graphGet(token, `/me/drive/sharedWithMe?$top=${SHOW}&$select=${encodeURIComponent(select)}`);
+    sharedWithMe = data.value || [];
+    pass('sharedWithMe returned', `${sharedWithMe.length} items`);
+  } catch (err) {
+    fail('/me/drive/sharedWithMe', err.message);
+  }
+
+  console.log(`\n${green('── Files from sharedWithMe ──')} (showing up to ${SHOW})`);
+  if (sharedWithMe.length === 0) {
+    console.log('  (none found)');
+  } else {
+    sharedWithMe.slice(0, SHOW).forEach(printItem);
+  }
   // Print samples
-  const SHOW = 5;
+  // (SHOW already declared at top of main)
 
   console.log(`\n${green('── Owned files (in /Documents) ──')} (showing up to ${SHOW})`);
   if (docsOnly.length === 0) {
