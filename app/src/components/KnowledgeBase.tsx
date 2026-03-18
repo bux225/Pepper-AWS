@@ -18,7 +18,7 @@ const NAV_ITEMS: Array<{ key: ViewMode; label: string; icon: string }> = [
   { key: 'todos', label: 'Todos', icon: '☑' },
   { key: 'follow-ups', label: 'Follow-ups', icon: '⏳' },
   { key: 'outbox', label: 'Outbox', icon: '📤' },
-  { key: 'urls', label: 'URL Directory', icon: '🔗' },
+  { key: 'urls', label: 'Reference Links', icon: '🔗' },
   { key: 'digest', label: 'Morning Digest', icon: '📰' },
   { key: 'people', label: 'People', icon: '👥' },
   { key: 'note', label: 'New Note', icon: '📝' },

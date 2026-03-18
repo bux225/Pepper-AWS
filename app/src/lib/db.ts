@@ -271,4 +271,32 @@ const migrations = [
       CREATE INDEX idx_todos_due_date ON todos(due_date);
     `,
   },
+  {
+    name: '012_enhance_urls_for_reference_links',
+    sql: `
+      CREATE TABLE urls_new (
+        id TEXT PRIMARY KEY,
+        url TEXT NOT NULL,
+        normalized_url TEXT NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        tags TEXT NOT NULL DEFAULT '[]',
+        category TEXT NOT NULL DEFAULT 'uncategorized',
+        source_type TEXT NOT NULL DEFAULT 'manual',
+        source_doc_id TEXT,
+        status TEXT NOT NULL DEFAULT 'confirmed' CHECK(status IN ('confirmed', 'recommended', 'dismissed')),
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      INSERT INTO urls_new (id, url, normalized_url, title, tags, category, source_doc_id, status, created_at, updated_at)
+        SELECT id, url, url, title, '[]', category, source_doc_id, 'confirmed', created_at, created_at FROM urls;
+
+      DROP TABLE urls;
+      ALTER TABLE urls_new RENAME TO urls;
+
+      CREATE UNIQUE INDEX idx_urls_normalized ON urls(normalized_url);
+      CREATE INDEX idx_urls_category ON urls(category);
+      CREATE INDEX idx_urls_status ON urls(status);
+    `,
+  },
 ];

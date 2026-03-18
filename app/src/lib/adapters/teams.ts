@@ -1,6 +1,7 @@
 import { fetchChats, fetchChatMessages, fetchCurrentUserId, type GraphChat, type GraphChatMessage } from '../graph';
 import { ingestTeamsMessage, type TeamsMessageDoc } from '../s3-ingest';
 import { extractPeopleFromDoc } from '../people';
+import { extractAndRecommendUrls } from '../reference-links';
 import { getWatermark, upsertWatermark } from '../tokens';
 import logger from '../logger';
 import type { AccountConfig } from '../types';
@@ -54,6 +55,8 @@ export async function pollTeams(
 
           const title = chat.topic || `Teams: ${msg.from?.user?.displayName ?? 'Unknown'}`;
           extractPeopleFromDoc(s3Key, title, [...new Set(people)]);
+          // Extract URLs as recommended reference links
+          extractAndRecommendUrls(text, 'teams', s3Key);
           imported++;
         }
       }

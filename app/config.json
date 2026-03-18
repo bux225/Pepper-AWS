@@ -9,7 +9,8 @@
       "scopes": [
         "Mail.Read",
         "Chat.Read",
-        "User.Read"
+        "User.Read",
+        "Files.Read"
       ],
       "envKey": "MS_CLIENT_SECRET",
       "enabled": true

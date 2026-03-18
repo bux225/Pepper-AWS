@@ -107,13 +107,19 @@ export interface DocMetadata {
 
 // === URL references ===
 
+export type ReferenceLinkStatus = 'confirmed' | 'recommended' | 'dismissed';
+
 export interface UrlReference {
   id: string;
   url: string;
   title: string;
+  tags: string[];
   category: string;
+  sourceType: string;
+  status: ReferenceLinkStatus;
   sourceDocId?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 // === People ===

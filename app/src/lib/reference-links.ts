@@ -1,0 +1,311 @@
+import { v4 as uuidv4 } from 'uuid';
+import { getDb } from './db';
+import { normalizeUrl, extractUrls } from './text';
+import { fetchRecentFiles, fetchSharedWithMe, type GraphDriveItem } from './graph';
+import { getEnabledAccounts } from './config.node';
+import logger from './logger';
+
+const log = logger.child({ module: 'reference-links' });
+
+// === Types ===
+
+export interface ReferenceLink {
+  id: string;
+  url: string;
+  title: string;
+  tags: string[];
+  category: string;
+  sourceType: string;
+  status: 'confirmed' | 'recommended' | 'dismissed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface UrlRow {
+  id: string;
+  url: string;
+  normalized_url: string;
+  title: string;
+  tags: string;
+  category: string;
+  source_type: string;
+  source_doc_id: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function rowToLink(r: UrlRow): ReferenceLink {
+  let tags: string[] = [];
+  try { tags = JSON.parse(r.tags); } catch { /* ignore */ }
+  return {
+    id: r.id,
+    url: r.url,
+    title: r.title,
+    tags,
+    category: r.category,
+    sourceType: r.source_type,
+    status: r.status as ReferenceLink['status'],
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
+// === Queries ===
+
+export function getLinks(opts: {
+  status?: string;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}): { links: ReferenceLink[]; total: number } {
+  const db = getDb();
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+
+  if (opts.status) {
+    conditions.push('status = ?');
+    params.push(opts.status);
+  }
+  if (opts.category) {
+    conditions.push('category = ?');
+    params.push(opts.category);
+  }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const limit = Math.min(Math.max(opts.limit ?? 200, 1), 500);
+  const offset = Math.max(opts.offset ?? 0, 0);
+
+  const rows = db.prepare(`
+    SELECT * FROM urls ${where}
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, limit, offset) as UrlRow[];
+
+  const total = (db.prepare(
+    `SELECT COUNT(*) as count FROM urls ${where}`
+  ).get(...params) as { count: number }).count;
+
+  return { links: rows.map(rowToLink), total };
+}
+
+export function updateLink(id: string, fields: { title?: string; tags?: string[] }): ReferenceLink | null {
+  const db = getDb();
+  const sets: string[] = [];
+  const params: unknown[] = [];
+
+  if (fields.title !== undefined) {
+    sets.push('title = ?');
+    params.push(fields.title);
+  }
+  if (fields.tags !== undefined) {
+    sets.push('tags = ?');
+    params.push(JSON.stringify(fields.tags));
+  }
+
+  if (sets.length === 0) return null;
+
+  sets.push("updated_at = datetime('now')");
+  params.push(id);
+
+  db.prepare(`UPDATE urls SET ${sets.join(', ')} WHERE id = ?`).run(...params);
+
+  const row = db.prepare('SELECT * FROM urls WHERE id = ?').get(id) as UrlRow | undefined;
+  return row ? rowToLink(row) : null;
+}
+
+export function acceptLink(id: string): ReferenceLink | null {
+  const db = getDb();
+  db.prepare(`
+    UPDATE urls SET status = 'confirmed', updated_at = datetime('now') WHERE id = ? AND status = 'recommended'
+  `).run(id);
+  const row = db.prepare('SELECT * FROM urls WHERE id = ?').get(id) as UrlRow | undefined;
+  return row ? rowToLink(row) : null;
+}
+
+export function dismissLink(id: string): boolean {
+  const db = getDb();
+  const result = db.prepare(`
+    UPDATE urls SET status = 'dismissed', updated_at = datetime('now') WHERE id = ? AND status = 'recommended'
+  `).run(id);
+  return result.changes > 0;
+}
+
+export function deleteLink(id: string): boolean {
+  const db = getDb();
+  const result = db.prepare('DELETE FROM urls WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
+// === Upsert helpers ===
+
+/**
+ * Insert a URL if its normalized form doesn't already exist.
+ * Returns the id if inserted, null if already present.
+ */
+function upsertUrl(opts: {
+  url: string;
+  title: string;
+  tags?: string[];
+  category?: string;
+  sourceType: string;
+  sourceDocId?: string;
+  status: 'confirmed' | 'recommended';
+}): string | null {
+  const db = getDb();
+  const normalized = normalizeUrl(opts.url);
+
+  const existing = db.prepare('SELECT id, status FROM urls WHERE normalized_url = ?').get(normalized) as
+    { id: string; status: string } | undefined;
+
+  if (existing) return null; // already tracked (confirmed, recommended, or dismissed)
+
+  const id = uuidv4();
+  db.prepare(`
+    INSERT INTO urls (id, url, normalized_url, title, tags, category, source_type, source_doc_id, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    opts.url,
+    normalized,
+    opts.title,
+    JSON.stringify(opts.tags ?? []),
+    opts.category ?? 'uncategorized',
+    opts.sourceType,
+    opts.sourceDocId ?? null,
+    opts.status,
+  );
+
+  return id;
+}
+
+// === OneDrive recents ===
+
+function categorizeOneDriveItem(item: GraphDriveItem): string {
+  const url = (item.webUrl ?? '').toLowerCase();
+  const name = (item.name ?? '').toLowerCase();
+  if (url.includes('sharepoint.com') || url.includes('sharepoint')) return 'sharepoint';
+  if (name.endsWith('.docx') || name.endsWith('.doc') || name.endsWith('.pdf')) return 'docs';
+  if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) return 'docs';
+  if (name.endsWith('.pptx') || name.endsWith('.ppt')) return 'docs';
+  return 'reference';
+}
+
+function tagsFromDriveItem(item: GraphDriveItem): string[] {
+  const tags: string[] = [];
+  const name = item.name ?? '';
+  const ext = name.split('.').pop()?.toLowerCase();
+  if (ext && ext !== name.toLowerCase()) tags.push(ext);
+
+  const parent = item.parentReference?.name;
+  if (parent && parent !== 'root') tags.push(parent);
+
+  return tags;
+}
+
+export async function syncOneDriveRecents(): Promise<{ imported: number; errors: string[] }> {
+  const accounts = getEnabledAccounts('microsoft').filter(a =>
+    a.scopes.some(s => s.toLowerCase().startsWith('files.read'))
+  );
+
+  if (accounts.length === 0) {
+    return { imported: 0, errors: ['No accounts with Files.Read scope found'] };
+  }
+
+  let imported = 0;
+  const errors: string[] = [];
+
+  for (const account of accounts) {
+    try {
+      // Fetch personal recents
+      const recents = await fetchRecentFiles(account);
+      for (const item of recents) {
+        if (!item.webUrl || item.folder) continue;
+        const id = upsertUrl({
+          url: item.webUrl,
+          title: item.name || item.webUrl,
+          tags: tagsFromDriveItem(item),
+          category: categorizeOneDriveItem(item),
+          sourceType: 'onedrive',
+          status: 'confirmed',
+        });
+        if (id) imported++;
+      }
+
+      // Fetch shared-with-me files
+      const shared = await fetchSharedWithMe(account);
+      for (const item of shared) {
+        const resolved = item.remoteItem ?? item;
+        if (!resolved.webUrl || resolved.folder) continue;
+        const id = upsertUrl({
+          url: resolved.webUrl,
+          title: resolved.name || resolved.webUrl,
+          tags: [...tagsFromDriveItem(resolved), 'shared'],
+          category: categorizeOneDriveItem(resolved),
+          sourceType: 'onedrive-shared',
+          status: 'confirmed',
+        });
+        if (id) imported++;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`OneDrive sync for "${account.name}": ${msg}`);
+      log.error({ account: account.name, error: msg }, 'OneDrive sync failed');
+    }
+  }
+
+  log.info({ imported }, 'OneDrive recents sync complete');
+  return { imported, errors };
+}
+
+// === Extract recommended URLs from content ===
+
+const SKIP_DOMAINS = new Set([
+  'aka.ms', 'go.microsoft.com', 'login.microsoftonline.com',
+  'login.windows.net', 'outlook.office365.com', 'outlook.office.com',
+  'outlook.live.com', 'teams.microsoft.com',
+  'statics.teams.cdn.office.net', 'graph.microsoft.com',
+]);
+
+function shouldSkipUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    if (SKIP_DOMAINS.has(host)) return true;
+    // Skip tracking/unsubscribe/pixel URLs
+    if (/\/(unsubscribe|track|click|open|pixel|beacon)/i.test(parsed.pathname)) return true;
+    // Skip very short paths that are likely redirects
+    if (parsed.pathname === '/' && !parsed.search) return true;
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Extract URLs from text content (email body, Teams message) and insert as recommended.
+ * Should be called during email/teams polling.
+ */
+export function extractAndRecommendUrls(
+  text: string,
+  sourceType: 'email' | 'teams',
+  sourceDocId?: string,
+): number {
+  const urls = extractUrls(text);
+  let count = 0;
+
+  for (const url of urls) {
+    if (shouldSkipUrl(url)) continue;
+
+    const id = upsertUrl({
+      url,
+      title: '', // Will be populated by the user when accepting
+      sourceType,
+      sourceDocId,
+      status: 'recommended',
+    });
+    if (id) count++;
+  }
+
+  return count;
+}

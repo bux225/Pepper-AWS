@@ -1,51 +1,79 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
+import {
+  getLinks,
+  updateLink,
+  acceptLink,
+  dismissLink,
+  deleteLink,
+  syncOneDriveRecents,
+} from '@/lib/reference-links';
 
 export async function GET(request: NextRequest) {
   const limited = rateLimit(request, 60, 60_000);
   if (limited) return limited;
 
-  const db = getDb();
   const { searchParams } = request.nextUrl;
+  const status = searchParams.get('status') ?? undefined;
   const category = searchParams.get('category') ?? undefined;
-  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '100', 10), 1), 500);
+  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '200', 10), 1), 500);
   const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10), 0);
 
-  const conditions: string[] = [];
-  const params: unknown[] = [];
+  const { links, total } = getLinks({ status, category, limit, offset });
 
-  if (category) {
-    conditions.push('category = ?');
-    params.push(category);
+  return NextResponse.json({ links, total, limit, offset });
+}
+
+export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, 20, 60_000);
+  if (limited) return limited;
+
+  const body = await request.json();
+  const action = body?.action;
+
+  if (action === 'accept' && typeof body.id === 'string') {
+    const link = acceptLink(body.id);
+    if (!link) return NextResponse.json({ error: 'Link not found or not recommended' }, { status: 404 });
+    return NextResponse.json({ link });
   }
 
-  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  if (action === 'dismiss' && typeof body.id === 'string') {
+    const ok = dismissLink(body.id);
+    if (!ok) return NextResponse.json({ error: 'Link not found or not recommended' }, { status: 404 });
+    return NextResponse.json({ success: true });
+  }
 
-  const rows = db.prepare(`
-    SELECT * FROM urls ${where}
-    ORDER BY created_at DESC
-    LIMIT ? OFFSET ?
-  `).all(...params, limit, offset) as Array<{
-    id: string;
-    url: string;
-    title: string;
-    category: string;
-    source_doc_id: string | null;
-    created_at: string;
-  }>;
+  if (action === 'delete' && typeof body.id === 'string') {
+    const ok = deleteLink(body.id);
+    if (!ok) return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+    return NextResponse.json({ success: true });
+  }
 
-  const total = (db.prepare(`SELECT COUNT(*) as count FROM urls ${where}`).get(...params) as { count: number }).count;
+  if (action === 'sync-onedrive') {
+    const result = await syncOneDriveRecents();
+    return NextResponse.json(result);
+  }
 
-  const urls = rows.map(r => ({
-    id: r.id,
-    url: r.url,
-    title: r.title,
-    category: r.category,
-    sourceDocId: r.source_doc_id,
-    createdAt: r.created_at,
-  }));
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+}
 
-  return NextResponse.json({ urls, total, limit, offset });
+export async function PATCH(request: NextRequest) {
+  const limited = rateLimit(request, 30, 60_000);
+  if (limited) return limited;
+
+  const body = await request.json();
+  const id = body?.id;
+  if (typeof id !== 'string') {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  }
+
+  const fields: { title?: string; tags?: string[] } = {};
+  if (typeof body.title === 'string') fields.title = body.title;
+  if (Array.isArray(body.tags)) fields.tags = body.tags.map(String);
+
+  const link = updateLink(id, fields);
+  if (!link) return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+
+  return NextResponse.json({ link });
 }
