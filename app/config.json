@@ -20,6 +20,6 @@
     "teamsIntervalSeconds": 300
   },
   "review": {
-    "emailRulesText": ""
+    "emailRulesText": "from:jira@bddevops.atlassian.net\nfrom:AutoNotification@concursolutions.com\nfrom:info@em.caremark.com\nfrom:no-reply@dtdg.co\nfrom:no-reply@teams.mail.microsoft\nfrom:no-reply@sharepointonline.com\n\n"
   }
 }
