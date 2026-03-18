@@ -80,6 +80,19 @@ async function graphGet(token, path) {
   return res.json();
 }
 
+async function graphPost(token, path, body) {
+  const res = await fetch(`${GRAPH_BASE}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Graph POST ${res.status}: ${res.statusText} — ${text}`);
+  }
+  return res.json();
+}
+
 // --- classify (mirrors graph.ts classifyDriveFiles) ---
 function classify(files, myDriveId, myUserId) {
   const owned = [];
@@ -110,10 +123,10 @@ function printItem(item, idx) {
 
 async function main() {
 
-  const SHOW = 5;
-  console.log('=========================================');
-  console.log(' OneDrive File Fetch + Classification');
-  console.log('=========================================\n');
+  const SHOW = 10;
+  console.log('=============================================');
+  console.log(' OneDrive: 3 Approaches to Finding Shared Files');
+  console.log('=============================================\n');
 
   // Step 0: Get stored token
   let token;
@@ -125,103 +138,159 @@ async function main() {
     process.exit(1);
   }
 
-  // Step 1: Get my drive ID
-  let myDriveId;
-  console.log(`\n${yellow('→')} Fetching /me/drive ...`);
+  // Step 1: Get my drive ID + user ID
+  let myDriveId, myUserId, myDisplayName;
+  console.log(`\n${yellow('→')} Fetching identity info ...`);
   try {
-    const drive = await graphGet(token, '/me/drive?$select=id');
+    const [drive, me] = await Promise.all([
+      graphGet(token, '/me/drive?$select=id'),
+      graphGet(token, '/me?$select=id,displayName'),
+    ]);
     myDriveId = drive.id;
-    pass('My drive ID', myDriveId);
-  } catch (err) {
-    fail('/me/drive', err.message);
-    process.exit(1);
-  }
-
-  // Step 2: Get my user ID
-  let myUserId;
-  console.log(`\n${yellow('→')} Fetching /me ...`);
-  try {
-    const me = await graphGet(token, '/me?$select=id,displayName');
     myUserId = me.id;
-    pass('My user ID', `${me.displayName} (${myUserId})`);
+    myDisplayName = me.displayName;
+    pass('Identity', `${myDisplayName} | driveId=${myDriveId} | userId=${myUserId}`);
   } catch (err) {
-    fail('/me', err.message);
+    fail('Identity', err.message);
     process.exit(1);
   }
 
-  // Step 3: Search drive files
-  const TOP = 50; // keep it small for test
-  console.log(`\n${yellow('→')} Searching drive files (top ${TOP}) ...`);
-  let files;
+  // ========================================
+  // APPROACH 1: /me/drive/root/search(q='')
+  // Only searches YOUR OneDrive. Shared files won't appear.
+  // ========================================
+  console.log(`\n${'━'.repeat(50)}`);
+  console.log(yellow(' APPROACH 1: /me/drive/root/search(q=\'\')'));
+  console.log(dim(' Scope: Only YOUR OneDrive. Will not find shared files.'));
+  console.log('━'.repeat(50));
+
   try {
-    const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
-    const data = await graphGet(token, `/me/drive/root/search(q='')?$top=${TOP}&$select=${encodeURIComponent(select)}`);
-    files = data.value || [];
-    pass('Search returned', `${files.length} items`);
+    const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,size,file,folder';
+    const data = await graphGet(token, `/me/drive/root/search(q='')?$top=50&$select=${encodeURIComponent(select)}`);
+    const files = data.value || [];
+    const { owned, shared } = classify(files, myDriveId, myUserId);
+    pass(`Returned ${files.length} items`, `${owned.length} owned, ${shared.length} shared`);
+
+    if (shared.length > 0) {
+      console.log(`\n  ${green('Shared items found (unexpected!):')}`);
+      shared.slice(0, SHOW).forEach(printItem);
+    } else {
+      console.log(dim('  No shared items — expected, this only searches your drive'));
+    }
   } catch (err) {
-    fail('Search', err.message);
-    process.exit(1);
+    fail('drive/root/search', err.message);
   }
 
-  // Step 4: Classify
-  const { owned, shared } = classify(files, myDriveId, myUserId);
-  console.log(`\n${yellow('→')} Classification results:`);
-  console.log(`  Owned: ${owned.length}   Shared: ${shared.length}`);
+  // ========================================
+  // APPROACH 2: /me/drive/sharedWithMe
+  // Only returns direct shares (link or explicit permission). Misses team/group shares.
+  // ========================================
+  console.log(`\n${'━'.repeat(50)}`);
+  console.log(yellow(' APPROACH 2: /me/drive/sharedWithMe'));
+  console.log(dim(' Scope: Only files explicitly shared via link/permission.'));
+  console.log(dim(' Known to be incomplete. Being deprecated.'));
+  console.log('━'.repeat(50));
 
-  // Step 5: Filter owned to /Documents
-  const docsOnly = owned.filter(f => {
-    const path = f.parentReference?.path || '';
-    return path.includes('/Documents');
-  });
-  console.log(`  Owned in /Documents: ${docsOnly.length}`);
-
-  // Step 6: Fetch sharedWithMe
-  console.log(`\n${yellow('→')} Fetching /me/drive/sharedWithMe ...`);
-  let sharedWithMe = [];
   try {
-    const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
-    const data = await graphGet(token, `/me/drive/sharedWithMe?$top=${SHOW}&$select=${encodeURIComponent(select)}`);
-    sharedWithMe = data.value || [];
-    pass('sharedWithMe returned', `${sharedWithMe.length} items`);
+    const data = await graphGet(token, '/me/drive/sharedWithMe?$top=200');
+    const files = data.value || [];
+    pass(`Returned ${files.length} items`);
+    files.slice(0, SHOW).forEach(printItem);
+    if (files.length === 0) console.log(dim('  (none)'));
   } catch (err) {
-    fail('/me/drive/sharedWithMe', err.message);
+    fail('sharedWithMe', err.message);
   }
 
-  console.log(`\n${green('── Files from sharedWithMe ──')} (showing up to ${SHOW})`);
-  if (sharedWithMe.length === 0) {
-    console.log('  (none found)');
-  } else {
-    sharedWithMe.slice(0, SHOW).forEach(printItem);
-  }
-  // Print samples
-  // (SHOW already declared at top of main)
+  // ========================================
+  // APPROACH 3: /search/query (Microsoft Search API)
+  // Searches ALL content you can access: your OneDrive, SharePoint, shared files.
+  // This is the recommended modern approach.
+  // Requires Files.Read.All scope (already configured).
+  // ========================================
+  console.log(`\n${'━'.repeat(50)}`);
+  console.log(yellow(' APPROACH 3: POST /search/query (Microsoft Search API)'));
+  console.log(dim(' Scope: ALL accessible content — your OneDrive + SharePoint + shared.'));
+  console.log(dim(' Recommended approach. Uses Files.Read.All.'));
+  console.log('━'.repeat(50));
 
-  console.log(`\n${green('── Owned files (in /Documents) ──')} (showing up to ${SHOW})`);
-  if (docsOnly.length === 0) {
-    console.log('  (none found)');
-  } else {
-    docsOnly.slice(0, SHOW).forEach(printItem);
+  try {
+    const searchBody = {
+      requests: [{
+        entityTypes: ['driveItem'],
+        query: { queryString: '*' },
+        from: 0,
+        size: 50,
+      }],
+    };
+    const data = await graphPost(token, '/search/query', searchBody);
+
+    const hitsContainer = data.value?.[0]?.hitsContainers?.[0];
+    const total = hitsContainer?.total || 0;
+    const moreAvailable = hitsContainer?.moreResultsAvailable || false;
+    const hits = hitsContainer?.hits || [];
+
+    pass(`Returned ${hits.length} hits`, `total available: ${total}${moreAvailable ? '+' : ''}`);
+
+    // Extract drive items from search hits and classify
+    const searchFiles = hits.map(h => h.resource).filter(Boolean);
+    const { owned: searchOwned, shared: searchShared } = classify(searchFiles, myDriveId, myUserId);
+    console.log(`  Classified: ${searchOwned.length} owned, ${searchShared.length} shared`);
+
+    // Filter owned to /Documents
+    const docsOnly = searchOwned.filter(f => {
+      const path = f.parentReference?.path || '';
+      return path.includes('/Documents');
+    });
+    console.log(`  Owned in /Documents: ${docsOnly.length}`);
+
+    console.log(`\n  ${green('── Owned files (in /Documents) ──')}`);
+    if (docsOnly.length === 0) {
+      console.log('  (none found)');
+    } else {
+      docsOnly.slice(0, SHOW).forEach(printItem);
+    }
+
+    const ownedOutsideDocs = searchOwned.filter(f => {
+      const path = f.parentReference?.path || '';
+      return !path.includes('/Documents');
+    });
+    if (ownedOutsideDocs.length > 0) {
+      console.log(`\n  ${yellow('── Owned files OUTSIDE /Documents (excluded) ──')}`);
+      ownedOutsideDocs.slice(0, SHOW).forEach(printItem);
+    }
+
+    console.log(`\n  ${green('── Shared files ──')}`);
+    if (searchShared.length === 0) {
+      console.log('  (none found)');
+    } else {
+      searchShared.slice(0, SHOW).forEach(printItem);
+    }
+
+    // Dump raw classification signals for first few shared files for debugging
+    if (searchShared.length > 0) {
+      console.log(`\n  ${dim('── Classification signals (first 3 shared) ──')}`);
+      searchShared.slice(0, 3).forEach((item, i) => {
+        console.log(`  ${i + 1}. ${item.name}`);
+        console.log(`     remoteItem: ${item.remoteItem ? 'YES' : 'no'}`);
+        console.log(`     parentRef.driveId: ${item.parentReference?.driveId || '(none)'} ${item.parentReference?.driveId !== myDriveId ? '≠ mine' : '= mine'}`);
+        console.log(`     createdBy.user.id: ${item.createdBy?.user?.id || '(none)'} ${item.createdBy?.user?.id !== myUserId ? '≠ mine' : '= mine'}`);
+      });
+    }
+
+  } catch (err) {
+    fail('Search API', err.message);
   }
 
-  const ownedOutsideDocs = owned.filter(f => {
-    const path = f.parentReference?.path || '';
-    return !path.includes('/Documents');
-  });
-  if (ownedOutsideDocs.length > 0) {
-    console.log(`\n${yellow('── Owned files OUTSIDE /Documents ──')} (showing up to ${SHOW}, these would be EXCLUDED)`);
-    ownedOutsideDocs.slice(0, SHOW).forEach(printItem);
-  }
-
-  console.log(`\n${green('── Shared files ──')} (showing up to ${SHOW})`);
-  if (shared.length === 0) {
-    console.log('  (none found)');
-  } else {
-    shared.slice(0, SHOW).forEach(printItem);
-  }
-
-  console.log(`\n${'='.repeat(41)}`);
-  console.log(` Total: ${files.length}  Owned: ${owned.length} (Docs: ${docsOnly.length})  Shared: ${shared.length}`);
-  console.log('=========================================');
+  // ========================================
+  // SUMMARY
+  // ========================================
+  console.log(`\n${'='.repeat(50)}`);
+  console.log(' RECOMMENDATION:');
+  console.log(' Use /search/query (Approach 3) for shared files.');
+  console.log(' It searches across all M365 content you can access.');
+  console.log(' Combine with /me/drive/root/search for owned files');
+  console.log(' if search API doesn\'t surface your own drive well.');
+  console.log('='.repeat(50));
 }
 
 main().catch((err) => {
