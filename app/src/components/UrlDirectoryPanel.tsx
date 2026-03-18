@@ -10,6 +10,7 @@ interface ReferenceLink {
   category: string;
   sourceType: string;
   status: 'confirmed' | 'recommended' | 'dismissed';
+  lastModified: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,6 +34,20 @@ const SOURCE_TYPE_LABELS: Record<string, string> = {
   manual: 'Manual',
 };
 
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch { return ''; }
+}
+
 function getDomain(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '');
@@ -54,12 +69,14 @@ export default function UrlDirectoryPanel() {
   const [sourceTypeFilter, setSourceTypeFilter] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState(false);
+  const [sortBy, setSortBy] = useState<'last_modified' | 'created_at' | 'title'>('last_modified');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const fetchLinks = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ status: 'confirmed', limit: '500' });
+      const params = new URLSearchParams({ status: 'confirmed', limit: '500', sort: sortBy, order: sortOrder });
       if (categoryFilter) params.set('category', categoryFilter);
       if (sourceTypeFilter) params.set('sourceType', sourceTypeFilter);
       const [confirmedRes, recommendedRes] = await Promise.all([
@@ -79,7 +96,7 @@ export default function UrlDirectoryPanel() {
     } finally {
       setLoading(false);
     }
-  }, [categoryFilter, sourceTypeFilter]);
+  }, [categoryFilter, sourceTypeFilter, sortBy, sortOrder]);
 
   useEffect(() => { fetchLinks(); }, [fetchLinks]);
 
@@ -207,19 +224,6 @@ export default function UrlDirectoryPanel() {
       )
     : confirmed;
 
-  // Group confirmed links by category
-  const grouped = filtered.reduce<Record<string, ReferenceLink[]>>((acc, link) => {
-    const cat = link.category || 'uncategorized';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(link);
-    return acc;
-  }, {});
-
-  const categories = Object.keys(grouped).sort((a, b) => {
-    const order = ['docs', 'wiki', 'project', 'tool', 'article', 'sharepoint', 'reference', 'uncategorized'];
-    return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
-  });
-
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -316,6 +320,22 @@ export default function UrlDirectoryPanel() {
             <option key={key} value={key}>{label}</option>
           ))}
         </select>
+        <select
+          value={`${sortBy}:${sortOrder}`}
+          onChange={e => {
+            const [col, dir] = e.target.value.split(':') as ['last_modified' | 'created_at' | 'title', 'asc' | 'desc'];
+            setSortBy(col);
+            setSortOrder(dir);
+          }}
+          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+        >
+          <option value="last_modified:desc">Modified ↓</option>
+          <option value="last_modified:asc">Modified ↑</option>
+          <option value="created_at:desc">Added ↓</option>
+          <option value="created_at:asc">Added ↑</option>
+          <option value="title:asc">Title A–Z</option>
+          <option value="title:desc">Title Z–A</option>
+        </select>
       </div>
 
       {/* Error */}
@@ -358,11 +378,11 @@ export default function UrlDirectoryPanel() {
             {/* Confirmed links */}
             {filtered.length === 0 ? (
               <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                {search || categoryFilter
+                {search || categoryFilter || sourceTypeFilter
                   ? 'No links match your search.'
                   : 'No reference links yet. Sync OneDrive or accept recommendations to get started.'}
               </div>
-            ) : categoryFilter || sourceTypeFilter ? (
+            ) : (
               <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {filtered.map(link => (
                   <EditableLinkRow
@@ -376,31 +396,6 @@ export default function UrlDirectoryPanel() {
                   />
                 ))}
               </ul>
-            ) : (
-              <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                {categories.map(cat => (
-                  <div key={cat}>
-                    <div className="sticky top-0 z-10 bg-zinc-50 px-5 py-2 dark:bg-zinc-950">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${CATEGORY_LABELS[cat]?.color ?? CATEGORY_LABELS.uncategorized.color}`}>
-                        {CATEGORY_LABELS[cat]?.label ?? cat} ({grouped[cat].length})
-                      </span>
-                    </div>
-                    <ul className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                      {grouped[cat].map(link => (
-                        <EditableLinkRow
-                          key={link.id}
-                          link={link}
-                          onDelete={handleDelete}
-                          onUpdate={fetchLinks}
-                          bulkMode={bulkAction}
-                          selected={selectedIds.has(link.id)}
-                          onToggleSelect={() => toggleSelect(link.id)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
             )}
           </>
         )}
@@ -597,9 +592,16 @@ function EditableLinkRow({
           ))}
         </div>
       </div>
-      <span className="hidden text-[11px] text-zinc-400 group-hover:inline dark:text-zinc-500">
-        click to edit
-      </span>
+      <div className="flex shrink-0 flex-col items-end gap-0.5">
+        {link.lastModified && (
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500" title={link.lastModified}>
+            {formatDate(link.lastModified)}
+          </span>
+        )}
+        <span className="hidden text-[11px] text-zinc-400 group-hover:inline dark:text-zinc-500">
+          edit
+        </span>
+      </div>
     </li>
   );
 }

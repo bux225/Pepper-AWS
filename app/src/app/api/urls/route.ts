@@ -20,10 +20,12 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status') ?? undefined;
   const category = searchParams.get('category') ?? undefined;
   const sourceType = searchParams.get('sourceType') ?? undefined;
+  const sort = searchParams.get('sort') ?? undefined;
+  const order = searchParams.get('order') === 'asc' ? 'asc' as const : searchParams.get('order') === 'desc' ? 'desc' as const : undefined;
   const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '200', 10), 1), 500);
   const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10), 0);
 
-  const { links, total } = getLinks({ status, category, sourceType, limit, offset });
+  const { links, total } = getLinks({ status, category, sourceType, sort, order, limit, offset });
 
   return NextResponse.json({ links, total, limit, offset });
 }

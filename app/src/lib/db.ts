@@ -308,4 +308,11 @@ const migrations = [
       CREATE INDEX idx_urls_status ON urls(status);
     `,
   },
+  {
+    name: '014_add_urls_last_modified',
+    sql: `
+      ALTER TABLE urls ADD COLUMN last_modified TEXT;
+      CREATE INDEX idx_urls_last_modified ON urls(last_modified);
+    `,
+  },
 ];

@@ -24,6 +24,7 @@ export interface ReferenceLink {
   category: string;
   sourceType: string;
   status: 'confirmed' | 'recommended' | 'dismissed';
+  lastModified: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +39,7 @@ interface UrlRow {
   source_type: string;
   source_doc_id: string | null;
   status: string;
+  last_modified: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -53,6 +55,7 @@ function rowToLink(r: UrlRow): ReferenceLink {
     category: r.category,
     sourceType: r.source_type,
     status: r.status as ReferenceLink['status'],
+    lastModified: r.last_modified,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -60,10 +63,18 @@ function rowToLink(r: UrlRow): ReferenceLink {
 
 // === Queries ===
 
+const VALID_SORT_COLUMNS: Record<string, string> = {
+  last_modified: 'last_modified',
+  created_at: 'created_at',
+  title: 'title',
+};
+
 export function getLinks(opts: {
   status?: string;
   category?: string;
   sourceType?: string;
+  sort?: string;
+  order?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
 }): { links: ReferenceLink[]; total: number } {
@@ -85,12 +96,14 @@ export function getLinks(opts: {
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const sortCol = VALID_SORT_COLUMNS[opts.sort ?? ''] ?? 'last_modified';
+  const sortDir = opts.order === 'asc' ? 'ASC' : 'DESC';
   const limit = Math.min(Math.max(opts.limit ?? 200, 1), 500);
   const offset = Math.max(opts.offset ?? 0, 0);
 
   const rows = db.prepare(`
     SELECT * FROM urls ${where}
-    ORDER BY created_at DESC
+    ORDER BY ${sortCol} ${sortDir} NULLS LAST, created_at DESC
     LIMIT ? OFFSET ?
   `).all(...params, limit, offset) as UrlRow[];
 
@@ -188,6 +201,7 @@ function upsertUrl(opts: {
   category?: string;
   sourceType: string;
   sourceDocId?: string;
+  lastModified?: string;
   status: 'confirmed' | 'recommended';
 }): string | null {
   const db = getDb();
@@ -196,12 +210,19 @@ function upsertUrl(opts: {
   const existing = db.prepare('SELECT id, status FROM urls WHERE normalized_url = ?').get(normalized) as
     { id: string; status: string } | undefined;
 
-  if (existing) return null; // already tracked (confirmed, recommended, or dismissed)
+  if (existing) {
+    // Update last_modified if we have a newer value
+    if (opts.lastModified) {
+      db.prepare(`UPDATE urls SET last_modified = ?, updated_at = datetime('now') WHERE id = ? AND (last_modified IS NULL OR last_modified < ?)`)
+        .run(opts.lastModified, existing.id, opts.lastModified);
+    }
+    return null;
+  }
 
   const id = uuidv4();
   db.prepare(`
-    INSERT INTO urls (id, url, normalized_url, title, tags, category, source_type, source_doc_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO urls (id, url, normalized_url, title, tags, category, source_type, source_doc_id, last_modified, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     opts.url,
@@ -211,6 +232,7 @@ function upsertUrl(opts: {
     opts.category ?? 'uncategorized',
     opts.sourceType,
     opts.sourceDocId ?? null,
+    opts.lastModified ?? null,
     opts.status,
   );
 
@@ -276,6 +298,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
           tags: tagsFromDriveItem(item),
           category: categorizeOneDriveItem(item),
           sourceType: 'onedrive',
+          lastModified: item.lastModifiedDateTime || undefined,
           status: 'confirmed',
         });
         if (id) ownedImported++;
@@ -302,6 +325,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
           tags: [...tagsFromDriveItem(resolved), 'shared'],
           category: categorizeOneDriveItem(resolved),
           sourceType: 'onedrive-shared',
+          lastModified: resolved.lastModifiedDateTime || undefined,
           status: 'confirmed',
         });
         if (id) sharedImported++;
