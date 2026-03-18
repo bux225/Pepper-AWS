@@ -25,6 +25,14 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   uncategorized: { label: 'Uncategorized', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' },
 };
 
+const SOURCE_TYPE_LABELS: Record<string, string> = {
+  onedrive: 'My OneDrive',
+  'onedrive-shared': 'Shared with me',
+  email: 'Email',
+  teams: 'Teams',
+  manual: 'Manual',
+};
+
 function getDomain(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, '');
@@ -43,13 +51,17 @@ export default function UrlDirectoryPanel() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [sourceTypeFilter, setSourceTypeFilter] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState(false);
 
   const fetchLinks = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ status: 'confirmed', limit: '200' });
+      const params = new URLSearchParams({ status: 'confirmed', limit: '500' });
       if (categoryFilter) params.set('category', categoryFilter);
+      if (sourceTypeFilter) params.set('sourceType', sourceTypeFilter);
       const [confirmedRes, recommendedRes] = await Promise.all([
         fetch(`/api/urls?${params}`),
         fetch('/api/urls?status=recommended&limit=100'),
@@ -67,7 +79,7 @@ export default function UrlDirectoryPanel() {
     } finally {
       setLoading(false);
     }
-  }, [categoryFilter]);
+  }, [categoryFilter, sourceTypeFilter]);
 
   useEffect(() => { fetchLinks(); }, [fetchLinks]);
 
@@ -91,6 +103,56 @@ export default function UrlDirectoryPanel() {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const handleBulkDismiss = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      const res = await fetch('/api/urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'bulk-dismiss', ids: [...selectedIds] }),
+      });
+      if (!res.ok) throw new Error('Bulk dismiss failed');
+      setSelectedIds(new Set());
+      setBulkAction(false);
+      await fetchLinks();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk dismiss failed');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      const res = await fetch('/api/urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'bulk-delete', ids: [...selectedIds] }),
+      });
+      if (!res.ok) throw new Error('Bulk delete failed');
+      setSelectedIds(new Set());
+      setBulkAction(false);
+      await fetchLinks();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk delete failed');
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllFiltered = () => {
+    setSelectedIds(new Set(filtered.map(l => l.id)));
+  };
+
+  const selectNone = () => {
+    setSelectedIds(new Set());
   };
 
   const handleAccept = async (id: string) => {
@@ -173,14 +235,57 @@ export default function UrlDirectoryPanel() {
             </span>
           )}
         </div>
-        <button
-          onClick={handleSyncOneDrive}
-          disabled={syncing}
-          className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {syncing ? 'Syncing…' : 'Sync OneDrive'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setBulkAction(!bulkAction); setSelectedIds(new Set()); }}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
+              bulkAction
+                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+            }`}
+          >
+            {bulkAction ? 'Cancel' : 'Bulk Edit'}
+          </button>
+          <button
+            onClick={handleSyncOneDrive}
+            disabled={syncing}
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {syncing ? 'Syncing…' : 'Sync OneDrive'}
+          </button>
+        </div>
       </div>
+
+      {/* Bulk action bar */}
+      {bulkAction && (
+        <div className="flex items-center gap-2 border-b border-amber-200 bg-amber-50 px-5 py-2 dark:border-amber-900/40 dark:bg-amber-950/30">
+          <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+            {selectedIds.size} selected
+          </span>
+          <button onClick={selectAllFiltered} className="text-xs text-blue-600 hover:underline dark:text-blue-400">
+            Select all ({filtered.length})
+          </button>
+          <button onClick={selectNone} className="text-xs text-zinc-500 hover:underline dark:text-zinc-400">
+            Clear
+          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={handleBulkDismiss}
+              disabled={selectedIds.size === 0}
+              className="rounded-md bg-zinc-200 px-3 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-300 disabled:opacity-40 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600"
+            >
+              Dismiss ({selectedIds.size})
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={selectedIds.size === 0}
+              className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 disabled:opacity-40 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60"
+            >
+              Delete ({selectedIds.size})
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search + Filter */}
       <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-2 dark:border-zinc-800">
@@ -191,6 +296,16 @@ export default function UrlDirectoryPanel() {
           placeholder="Search links, titles, or tags…"
           className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
         />
+        <select
+          value={sourceTypeFilter}
+          onChange={e => setSourceTypeFilter(e.target.value)}
+          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+        >
+          <option value="">All sources</option>
+          {Object.entries(SOURCE_TYPE_LABELS).map(([key, label]) => (
+            <option key={key} value={key}>{label}</option>
+          ))}
+        </select>
         <select
           value={categoryFilter}
           onChange={e => setCategoryFilter(e.target.value)}
@@ -247,10 +362,18 @@ export default function UrlDirectoryPanel() {
                   ? 'No links match your search.'
                   : 'No reference links yet. Sync OneDrive or accept recommendations to get started.'}
               </div>
-            ) : categoryFilter ? (
+            ) : categoryFilter || sourceTypeFilter ? (
               <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {filtered.map(link => (
-                  <EditableLinkRow key={link.id} link={link} onDelete={handleDelete} onUpdate={fetchLinks} />
+                  <EditableLinkRow
+                    key={link.id}
+                    link={link}
+                    onDelete={handleDelete}
+                    onUpdate={fetchLinks}
+                    bulkMode={bulkAction}
+                    selected={selectedIds.has(link.id)}
+                    onToggleSelect={() => toggleSelect(link.id)}
+                  />
                 ))}
               </ul>
             ) : (
@@ -264,7 +387,15 @@ export default function UrlDirectoryPanel() {
                     </div>
                     <ul className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
                       {grouped[cat].map(link => (
-                        <EditableLinkRow key={link.id} link={link} onDelete={handleDelete} onUpdate={fetchLinks} />
+                        <EditableLinkRow
+                          key={link.id}
+                          link={link}
+                          onDelete={handleDelete}
+                          onUpdate={fetchLinks}
+                          bulkMode={bulkAction}
+                          selected={selectedIds.has(link.id)}
+                          onToggleSelect={() => toggleSelect(link.id)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -335,10 +466,16 @@ function EditableLinkRow({
   link,
   onDelete,
   onUpdate,
+  bulkMode,
+  selected,
+  onToggleSelect,
 }: {
   link: ReferenceLink;
   onDelete: (id: string) => void;
   onUpdate: () => void;
+  bulkMode: boolean;
+  selected: boolean;
+  onToggleSelect: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(link.title);
@@ -411,9 +548,20 @@ function EditableLinkRow({
 
   return (
     <li
-      className="group flex cursor-pointer items-start gap-3 px-5 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-      onClick={() => setEditing(true)}
+      className={`group flex items-start gap-3 px-5 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 ${
+        bulkMode ? 'cursor-pointer' : 'cursor-pointer'
+      } ${selected ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+      onClick={bulkMode ? onToggleSelect : () => setEditing(true)}
     >
+      {bulkMode && (
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          onClick={e => e.stopPropagation()}
+          className="mt-1 h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
+        />
+      )}
       <div className="min-w-0 flex-1">
         <a
           href={link.url}
@@ -429,8 +577,14 @@ function EditableLinkRow({
             {getDomain(link.url)}
           </span>
           {link.sourceType && link.sourceType !== 'manual' && (
-            <span className="text-zinc-400 dark:text-zinc-500">
-              via {link.sourceType}
+            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+              link.sourceType === 'onedrive'
+                ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-400'
+                : link.sourceType === 'onedrive-shared'
+                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400'
+                : 'text-zinc-400 dark:text-zinc-500'
+            }`}>
+              {SOURCE_TYPE_LABELS[link.sourceType] ?? link.sourceType}
             </span>
           )}
           {link.tags.length > 0 && link.tags.map(tag => (

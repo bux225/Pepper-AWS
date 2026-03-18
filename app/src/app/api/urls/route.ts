@@ -7,6 +7,8 @@ import {
   acceptLink,
   dismissLink,
   deleteLink,
+  bulkDismiss,
+  bulkDelete,
   syncOneDriveRecents,
 } from '@/lib/reference-links';
 
@@ -17,10 +19,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const status = searchParams.get('status') ?? undefined;
   const category = searchParams.get('category') ?? undefined;
+  const sourceType = searchParams.get('sourceType') ?? undefined;
   const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '200', 10), 1), 500);
   const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10), 0);
 
-  const { links, total } = getLinks({ status, category, limit, offset });
+  const { links, total } = getLinks({ status, category, sourceType, limit, offset });
 
   return NextResponse.json({ links, total, limit, offset });
 }
@@ -53,6 +56,18 @@ export async function POST(request: NextRequest) {
   if (action === 'sync-onedrive') {
     const result = await syncOneDriveRecents();
     return NextResponse.json(result);
+  }
+
+  if (action === 'bulk-dismiss' && Array.isArray(body.ids)) {
+    const ids = body.ids.filter((id: unknown) => typeof id === 'string').slice(0, 500);
+    const changed = bulkDismiss(ids);
+    return NextResponse.json({ changed });
+  }
+
+  if (action === 'bulk-delete' && Array.isArray(body.ids)) {
+    const ids = body.ids.filter((id: unknown) => typeof id === 'string').slice(0, 500);
+    const changed = bulkDelete(ids);
+    return NextResponse.json({ changed });
   }
 
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

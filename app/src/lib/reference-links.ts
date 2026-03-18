@@ -63,6 +63,7 @@ function rowToLink(r: UrlRow): ReferenceLink {
 export function getLinks(opts: {
   status?: string;
   category?: string;
+  sourceType?: string;
   limit?: number;
   offset?: number;
 }): { links: ReferenceLink[]; total: number } {
@@ -77,6 +78,10 @@ export function getLinks(opts: {
   if (opts.category) {
     conditions.push('category = ?');
     params.push(opts.category);
+  }
+  if (opts.sourceType) {
+    conditions.push('source_type = ?');
+    params.push(opts.sourceType);
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -133,7 +138,7 @@ export function acceptLink(id: string): ReferenceLink | null {
 export function dismissLink(id: string): boolean {
   const db = getDb();
   const result = db.prepare(`
-    UPDATE urls SET status = 'dismissed', updated_at = datetime('now') WHERE id = ? AND status = 'recommended'
+    UPDATE urls SET status = 'dismissed', updated_at = datetime('now') WHERE id = ?
   `).run(id);
   return result.changes > 0;
 }
@@ -142,6 +147,32 @@ export function deleteLink(id: string): boolean {
   const db = getDb();
   const result = db.prepare('DELETE FROM urls WHERE id = ?').run(id);
   return result.changes > 0;
+}
+
+export function bulkDismiss(ids: string[]): number {
+  const db = getDb();
+  const stmt = db.prepare(`UPDATE urls SET status = 'dismissed', updated_at = datetime('now') WHERE id = ?`);
+  let changed = 0;
+  const tx = db.transaction(() => {
+    for (const id of ids) {
+      changed += stmt.run(id).changes;
+    }
+  });
+  tx();
+  return changed;
+}
+
+export function bulkDelete(ids: string[]): number {
+  const db = getDb();
+  const stmt = db.prepare('DELETE FROM urls WHERE id = ?');
+  let changed = 0;
+  const tx = db.transaction(() => {
+    for (const id of ids) {
+      changed += stmt.run(id).changes;
+    }
+  });
+  tx();
+  return changed;
 }
 
 // === Upsert helpers ===

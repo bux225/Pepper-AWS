@@ -30,6 +30,31 @@ export async function graphFetch(
   return res;
 }
 
+/** Fetch a full Graph API URL (e.g. @odata.nextLink) */
+async function graphFetchRaw(
+  account: AccountConfig,
+  fullUrl: string,
+  options?: RequestInit,
+): Promise<Response> {
+  const token = await getAccessToken(account);
+
+  const res = await fetch(fullUrl, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Graph API ${res.status}: ${res.statusText} — ${body}`);
+  }
+
+  return res;
+}
+
 // === Email types ===
 
 export interface GraphEmail {
@@ -214,16 +239,26 @@ export async function fetchMyUserId(account: AccountConfig): Promise<string> {
 
 /**
  * Search all files in the user's OneDrive using the search endpoint.
- * Returns up to `top` results with fields needed for ownership classification.
+ * Paginates through all pages up to `maxItems` results.
  */
-export async function searchDriveFiles(account: AccountConfig, top = 200): Promise<GraphDriveItem[]> {
+export async function searchDriveFiles(account: AccountConfig, maxItems = 200): Promise<GraphDriveItem[]> {
   const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
-  const res = await graphFetch(
-    account,
-    `/me/drive/root/search(q='')?$top=${top}&$select=${encodeURIComponent(select)}`,
-  );
-  const data = await res.json() as GraphDriveItemResponse;
-  return data.value;
+  const pageSize = Math.min(maxItems, 200);
+  const all: GraphDriveItem[] = [];
+
+  let url: string | null = `/me/drive/root/search(q='')?$top=${pageSize}&$select=${encodeURIComponent(select)}`;
+
+  while (url && all.length < maxItems) {
+    const isFullUrl = url.startsWith('http');
+    const res = isFullUrl
+      ? await graphFetchRaw(account, url)
+      : await graphFetch(account, url);
+    const data = await res.json() as GraphDriveItemResponse;
+    all.push(...data.value);
+    url = data['@odata.nextLink'] ?? null;
+  }
+
+  return all.slice(0, maxItems);
 }
 
 /**
