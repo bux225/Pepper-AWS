@@ -6,7 +6,7 @@ interface Todo {
   id: string;
   title: string;
   description: string;
-  status: 'open' | 'done' | 'cancelled';
+  status: 'open' | 'done' | 'cancelled' | 'suggested';
   priority: 'high' | 'medium' | 'low';
   dueDate?: string;
   sourceDocId?: string;
@@ -33,6 +33,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 export default function TodoPanel() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [suggested, setSuggested] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<FilterStatus>('open');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,19 +43,6 @@ export default function TodoPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [scanning, setScanning] = useState(false);
-
-  // Follow-ups state
-  const [followUps, setFollowUps] = useState<Array<{
-    id: number;
-    sourceDocId: string;
-    sourceType: string;
-    status: string;
-    direction: string;
-    contactName: string;
-    summary: string;
-    staleDays: number;
-  }>>([]);
-  const [followUpCount, setFollowUpCount] = useState(0);
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -73,47 +61,44 @@ export default function TodoPanel() {
     }
   }, [filter]);
 
+  const fetchSuggested = useCallback(async () => {
+    try {
+      const res = await fetch('/api/todos?status=suggested&limit=50');
+      if (res.ok) {
+        const data = await res.json();
+        setSuggested(data.todos ?? []);
+      }
+    } catch { /* non-critical */ }
+  }, []);
+
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
 
-  // Fetch follow-ups
-  const fetchFollowUps = useCallback(async () => {
-    try {
-      const res = await fetch('/api/follow-ups?status=waiting');
-      if (res.ok) {
-        const data = await res.json();
-        setFollowUps(data.followUps ?? []);
-        setFollowUpCount(data.waitingCount ?? 0);
-      }
-    } catch {
-      // non-critical
-    }
-  }, []);
-
   useEffect(() => {
-    fetchFollowUps();
-  }, [fetchFollowUps]);
+    fetchSuggested();
+  }, [fetchSuggested]);
 
-  const resolveFollowUp = async (id: number) => {
+  const approveTodo = async (id: string) => {
     try {
-      await fetch('/api/follow-ups', {
+      await fetch(`/api/todos/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'resolved' }),
+        body: JSON.stringify({ status: 'open' }),
       });
-      fetchFollowUps();
+      fetchTodos();
+      fetchSuggested();
     } catch { /* silent */ }
   };
 
-  const dismissFollowUp = async (id: number) => {
+  const dismissTodo = async (id: string) => {
     try {
-      await fetch('/api/follow-ups', {
+      await fetch(`/api/todos/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'dismissed' }),
+        body: JSON.stringify({ status: 'cancelled' }),
       });
-      fetchFollowUps();
+      fetchSuggested();
     } catch { /* silent */ }
   };
 
@@ -160,9 +145,7 @@ export default function TodoPanel() {
         body: JSON.stringify({ priority }),
       });
       fetchTodos();
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   };
 
   const saveEdit = async (id: string) => {
@@ -176,28 +159,21 @@ export default function TodoPanel() {
       });
       setEditingId(null);
       fetchTodos();
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   };
 
   const deleteTodo = async (id: string) => {
     try {
       await fetch(`/api/todos/${id}`, { method: 'DELETE' });
       fetchTodos();
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   };
 
   const scanNow = async () => {
     setScanning(true);
     try {
-      await Promise.all([
-        fetch('/api/todos/extract', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } }),
-        fetch('/api/follow-ups', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } }),
-      ]);
-      await Promise.all([fetchTodos(), fetchFollowUps()]);
+      await fetch('/api/todos/extract', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } });
+      await Promise.all([fetchTodos(), fetchSuggested()]);
     } catch { /* silent */ } finally {
       setScanning(false);
     }
@@ -214,9 +190,9 @@ export default function TodoPanel() {
           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">
             {openTodos.length} open
           </span>
-          {followUpCount > 0 && (
-            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-400">
-              {followUpCount} follow-up{followUpCount !== 1 ? 's' : ''}
+          {suggested.length > 0 && (
+            <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-400">
+              {suggested.length} suggested
             </span>
           )}
         </div>
@@ -238,7 +214,7 @@ export default function TodoPanel() {
             onClick={scanNow}
             disabled={scanning}
             className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            title="Scan emails for todos & follow-ups"
+            title="Scan emails for suggested todos"
           >
             {scanning ? 'Scanning…' : '⟳ Scan'}
           </button>
@@ -303,7 +279,7 @@ export default function TodoPanel() {
           <div className="p-4 text-sm text-zinc-500 dark:text-zinc-400">Loading…</div>
         ) : todos.length === 0 ? (
           <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            {filter === 'open' ? 'No open todos. You\'re all caught up! 🎉' : 'No todos found.'}
+            {filter === 'open' ? 'No open todos. You\'re all caught up!' : 'No todos found.'}
           </div>
         ) : (
           <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -403,63 +379,57 @@ export default function TodoPanel() {
           </ul>
         )}
 
-        {/* Follow-ups Section */}
-        {filter === 'open' && followUps.length > 0 && (
+        {/* Suggested Todos Section */}
+        {filter === 'open' && suggested.length > 0 && (
           <div className="border-t border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center justify-between bg-orange-50/50 px-4 py-2.5 dark:bg-orange-950/20">
+            <div className="flex items-center justify-between bg-violet-50/50 px-4 py-2.5 dark:bg-violet-950/20">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
-                  ⏳ Waiting for Response
+                <span className="text-sm font-medium text-violet-700 dark:text-violet-400">
+                  💡 Suggested
                 </span>
-                <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[11px] font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-400">
-                  {followUps.length}
+                <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[11px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-400">
+                  {suggested.length}
                 </span>
               </div>
             </div>
-            <ul className="divide-y divide-orange-100 dark:divide-orange-900/30">
-              {followUps.map(fu => (
-                <li key={fu.id} className="flex items-start gap-3 bg-orange-50/30 px-4 py-2.5 dark:bg-orange-950/10">
-                  <div className="mt-0.5 flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center rounded-full border border-orange-400 text-[10px] text-orange-500 dark:border-orange-600 dark:text-orange-400">
-                    ⏳
+            <ul className="divide-y divide-violet-100 dark:divide-violet-900/30">
+              {suggested.map(todo => (
+                <li key={todo.id} className="flex items-start gap-3 bg-violet-50/30 px-4 py-2.5 dark:bg-violet-950/10">
+                  <div className="mt-0.5 flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center rounded-full border border-violet-400 text-[10px] text-violet-500 dark:border-violet-600 dark:text-violet-400">
+                    ?
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-zinc-800 dark:text-zinc-200">{fu.summary}</p>
+                    <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                      {SOURCE_LABELS[todo.sourceType] && (
+                        <span className="mr-1" title={`From ${todo.sourceType}`}>{SOURCE_LABELS[todo.sourceType]}</span>
+                      )}
+                      {todo.title}
+                    </p>
                     <div className="mt-0.5 flex items-center gap-2 text-[11px]">
-                      <span className="text-orange-600 dark:text-orange-400">
-                        {fu.sourceType === 'email' ? '📧' : '💬'} {fu.contactName}
+                      <span className={`rounded-full px-1.5 py-0.5 font-medium ${PRIORITY_BADGES[todo.priority]}`}>
+                        {todo.priority}
                       </span>
-                      {fu.staleDays > 0 && (
-                        <span className={`font-medium ${
-                          fu.staleDays >= 5 ? 'text-red-600 dark:text-red-400' :
-                          fu.staleDays >= 3 ? 'text-orange-600 dark:text-orange-400' :
-                          'text-zinc-500 dark:text-zinc-400'
-                        }`}>
-                          {fu.staleDays}d ago
+                      {todo.description && (
+                        <span className="truncate text-zinc-400 dark:text-zinc-500" title={todo.description}>
+                          {todo.description}
                         </span>
                       )}
-                      <span className="text-zinc-400">
-                        {fu.direction === 'awaiting_reply' ? 'Waiting for their reply' : 'Needs your response'}
-                      </span>
                     </div>
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-1">
                     <button
-                      onClick={() => resolveFollowUp(fu.id)}
-                      className="rounded p-1 text-emerald-600 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
-                      title="Mark as resolved"
+                      onClick={() => approveTodo(todo.id)}
+                      className="rounded px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+                      title="Approve — add to your todos"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                      ✓ Keep
                     </button>
                     <button
-                      onClick={() => dismissFollowUp(fu.id)}
-                      className="rounded p-1 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
-                      title="Dismiss"
+                      onClick={() => dismissTodo(todo.id)}
+                      className="rounded px-2 py-1 text-xs font-medium text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+                      title="Dismiss suggestion"
                     >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      ✕
                     </button>
                   </div>
                 </li>

@@ -70,13 +70,13 @@ export const createTodoSchema = z.object({
 export const updateTodoSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   description: z.string().max(10000).optional(),
-  status: z.enum(['open', 'done', 'cancelled']).optional(),
+  status: z.enum(['open', 'done', 'cancelled', 'suggested']).optional(),
   priority: z.enum(['high', 'medium', 'low']).optional(),
   dueDate: z.string().max(30).nullable().optional(),
 });
 
 export const todoQuerySchema = z.object({
-  status: z.enum(['open', 'done', 'cancelled']).optional(),
+  status: z.enum(['open', 'done', 'cancelled', 'suggested']).optional(),
   priority: z.enum(['high', 'medium', 'low']).optional(),
   limit: z.coerce.number().int().min(1).max(1000).default(200),
   offset: z.coerce.number().int().min(0).max(100000).default(0),

@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
         dueDate: item.dueDate || undefined,
         sourceDocId: matchedDoc?.id ?? docSummaries[0]?.id,
         sourceType: (matchedDoc?.sourceType ?? 'email') as 'email' | 'teams',
+        status: 'suggested',
       });
       created++;
     }

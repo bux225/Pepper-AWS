@@ -39,12 +39,13 @@ export function createTodo(input: CreateTodoInput): Todo {
   const now = new Date().toISOString();
 
   db.prepare(`
-    INSERT INTO todos (id, title, description, priority, due_date, source_doc_id, source_type, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO todos (id, title, description, status, priority, due_date, source_doc_id, source_type, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     input.title,
     input.description ?? '',
+    input.status ?? 'open',
     input.priority ?? 'medium',
     input.dueDate ?? null,
     input.sourceDocId ?? null,
@@ -91,7 +92,7 @@ export function listTodos(options: ListTodosOptions = {}): Todo[] {
   const sql = `
     SELECT * FROM todos ${where}
     ORDER BY
-      CASE status WHEN 'open' THEN 0 WHEN 'done' THEN 1 WHEN 'cancelled' THEN 2 END,
+      CASE status WHEN 'open' THEN 0 WHEN 'suggested' THEN 1 WHEN 'done' THEN 2 WHEN 'cancelled' THEN 3 END,
       CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 END,
       created_at DESC
     LIMIT ? OFFSET ?

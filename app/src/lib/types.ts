@@ -2,7 +2,7 @@
 
 // === Todo: actionable work items ===
 
-export type TodoStatus = 'open' | 'done' | 'cancelled';
+export type TodoStatus = 'open' | 'done' | 'cancelled' | 'suggested';
 export type TodoPriority = 'high' | 'medium' | 'low';
 export type TodoSourceType = 'manual' | 'email' | 'teams' | 'chat';
 
@@ -27,6 +27,7 @@ export interface CreateTodoInput {
   dueDate?: string;
   sourceDocId?: string;
   sourceType?: TodoSourceType;
+  status?: TodoStatus;
 }
 
 export interface UpdateTodoInput {

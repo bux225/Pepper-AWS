@@ -246,4 +246,29 @@ const migrations = [
       );
     `,
   },
+  {
+    name: '011_add_suggested_todo_status',
+    sql: `
+      -- SQLite doesn't support ALTER CHECK directly, so we recreate with the new constraint
+      CREATE TABLE todos_new (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open', 'done', 'cancelled', 'suggested')),
+        priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('high', 'medium', 'low')),
+        due_date TEXT,
+        source_doc_id TEXT,
+        source_type TEXT NOT NULL DEFAULT 'manual' CHECK(source_type IN ('manual', 'email', 'teams', 'chat')),
+        completed_at TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO todos_new SELECT * FROM todos;
+      DROP TABLE todos;
+      ALTER TABLE todos_new RENAME TO todos;
+      CREATE INDEX idx_todos_status ON todos(status);
+      CREATE INDEX idx_todos_priority ON todos(priority);
+      CREATE INDEX idx_todos_due_date ON todos(due_date);
+    `,
+  },
 ];
