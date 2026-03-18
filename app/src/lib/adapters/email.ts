@@ -2,6 +2,7 @@ import { fetchEmails, type GraphEmail } from '../graph';
 import { ingestEmail, type EmailDoc } from '../s3-ingest';
 import { extractPeopleFromDoc } from '../people';
 import { getWatermark, upsertWatermark } from '../tokens';
+import { loadConfig } from '../config.node';
 import logger from '../logger';
 import type { AccountConfig } from '../types';
 import { htmlToText } from '../text';
@@ -22,21 +23,83 @@ function isMeetingEmail(email: GraphEmail): boolean {
   return false;
 }
 
+interface DismissRule {
+  type: 'from' | 'subject' | 'contains';
+  value: string;
+}
+
+function parseDismissRules(): DismissRule[] {
+  const config = loadConfig();
+  const text = config.review?.emailRulesText ?? '';
+  if (!text.trim()) return [];
+
+  const rules: DismissRule[] = [];
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const colonIdx = trimmed.indexOf(':');
+    if (colonIdx === -1) continue;
+
+    const prefix = trimmed.slice(0, colonIdx).toLowerCase();
+    const value = trimmed.slice(colonIdx + 1).trim().toLowerCase();
+    if (!value) continue;
+
+    if (prefix === 'from' || prefix === 'subject' || prefix === 'contains') {
+      rules.push({ type: prefix, value });
+    }
+  }
+  return rules;
+}
+
+function shouldDismissEmail(
+  email: GraphEmail,
+  rules: DismissRule[],
+): boolean {
+  if (rules.length === 0) return false;
+
+  const fromAddress = (email.from?.emailAddress?.address ?? '').toLowerCase();
+  const fromName = (email.from?.emailAddress?.name ?? '').toLowerCase();
+  const subject = (email.subject ?? '').toLowerCase();
+  const bodyPreview = (email.bodyPreview ?? '').toLowerCase();
+
+  for (const rule of rules) {
+    switch (rule.type) {
+      case 'from':
+        if (fromAddress.includes(rule.value) || fromName.includes(rule.value)) return true;
+        break;
+      case 'subject':
+        if (subject.includes(rule.value)) return true;
+        break;
+      case 'contains':
+        if (subject.includes(rule.value) || bodyPreview.includes(rule.value)) return true;
+        break;
+    }
+  }
+  return false;
+}
+
 /**
  * Poll emails for a given account and ingest to S3.
  * Uses delta queries for incremental polling.
  */
 export async function pollEmails(
   account: AccountConfig,
-): Promise<{ imported: number; errors: string[] }> {
+): Promise<{ imported: number; dismissed: number; errors: string[] }> {
   const watermark = getWatermark(account.id, 'email');
   const { emails, deltaLink } = await fetchEmails(account, watermark?.deltaLink);
 
   let imported = 0;
+  let dismissed = 0;
   const errors: string[] = [];
+  const dismissRules = parseDismissRules();
 
   for (const email of emails) {
     if (isMeetingEmail(email)) continue;
+    if (shouldDismissEmail(email, dismissRules)) {
+      dismissed++;
+      continue;
+    }
 
     try {
       const plainContent = email.body.contentType === 'html'
@@ -86,5 +149,9 @@ export async function pollEmails(
     upsertWatermark(account.id, 'email', deltaLink);
   }
 
-  return { imported, errors };
+  if (dismissed > 0) {
+    logger.info({ dismissed }, 'Dismissed emails by rules');
+  }
+
+  return { imported, dismissed, errors };
 }
