@@ -1,0 +1,3 @@
+Show date/time(local) of last ingests on Todo/follow up window (next to scan?)
+How could i add a specific kb?  Like a folder of documents about a specific topic that 
+aws agent would use for questions around that topic?
