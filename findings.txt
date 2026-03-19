@@ -1,1 +1,8 @@
-https://bd1-my.sharepoint.com/personal/matt_soltis_bd_com/Documents/Documents/Personal%20Agent/.obsidian/workspace.json
+Scan/Ingest time on todo's is still 5 hours ahead
+Reference URL's categories would be better if Word Doc, Powerpoint, Excel, Other
+
+Problems:
+* I'm often seeing in terminal logs that I need to re-authenticate to M365.  What is the reason?  Can we refresh?
+* I just did another onedrive sync and it re-introduced several files in my documents folder that I had deleted from the UI.  
+I don't want that.  The Pepper UI should be for me to keep quick access to the most used files I want to see.
+So if I soft delete it from my UI I don't want the next sync to pull it back in (at least if it hasn't been modified since soft delete)
