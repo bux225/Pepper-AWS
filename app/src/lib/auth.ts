@@ -1,7 +1,9 @@
 import { ConfidentialClientApplication, CryptoProvider } from '@azure/msal-node';
-import { getToken, upsertToken, isTokenExpired } from './tokens';
+import { getToken, upsertToken, isTokenExpired, getMsalCache, saveMsalCache } from './tokens';
 import logger from './logger';
 import type { AccountConfig } from './types';
+
+const log = logger.child({ module: 'auth' });
 
 const cryptoProvider = new CryptoProvider();
 const msalApps = new Map<string, ConfidentialClientApplication>();
@@ -94,10 +96,27 @@ export async function handleCallback(
     result.expiresOn ?? new Date(Date.now() + 3600_000),
     account.scopes,
   );
+
+  // Persist MSAL cache so refresh tokens survive server restarts
+  const cacheContents = app.getTokenCache().serialize();
+  saveMsalCache(account.id, cacheContents);
 }
 
 export async function getAccessToken(account: AccountConfig): Promise<string> {
   const app = getMsalApp(account);
+
+  // Restore persisted MSAL cache (contains refresh tokens) if in-memory cache is empty
+  try {
+    const cachedAccounts = await app.getTokenCache().getAllAccounts();
+    if (cachedAccounts.length === 0) {
+      const stored = getMsalCache(account.id);
+      if (stored) {
+        app.getTokenCache().deserialize(stored);
+      }
+    }
+  } catch (err) {
+    log.warn({ error: err instanceof Error ? err.message : String(err) }, 'Failed to restore MSAL cache');
+  }
 
   try {
     const accounts = await app.getTokenCache().getAllAccounts();
@@ -108,6 +127,8 @@ export async function getAccessToken(account: AccountConfig): Promise<string> {
       });
       if (result) {
         upsertToken(account.id, result.accessToken, null, result.expiresOn ?? new Date(Date.now() + 3600_000), account.scopes);
+        // Update persisted cache with refreshed tokens
+        saveMsalCache(account.id, app.getTokenCache().serialize());
         return result.accessToken;
       }
     }

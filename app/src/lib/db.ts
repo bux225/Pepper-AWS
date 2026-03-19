@@ -315,4 +315,10 @@ const migrations = [
       CREATE INDEX idx_urls_last_modified ON urls(last_modified);
     `,
   },
+  {
+    name: '015_add_msal_cache',
+    sql: `
+      ALTER TABLE account_tokens ADD COLUMN msal_cache TEXT;
+    `,
+  },
 ];

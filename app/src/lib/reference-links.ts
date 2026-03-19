@@ -224,6 +224,10 @@ function upsertUrl(opts: {
     { id: string; status: string } | undefined;
 
   if (existing) {
+    // Don't resurrect dismissed URLs — user explicitly removed them
+    if (existing.status === 'dismissed') {
+      return null;
+    }
     // Update last_modified if we have a newer value
     if (opts.lastModified) {
       db.prepare(`UPDATE urls SET last_modified = ?, updated_at = datetime('now') WHERE id = ? AND (last_modified IS NULL OR last_modified < ?)`)
@@ -255,13 +259,12 @@ function upsertUrl(opts: {
 // === OneDrive recents ===
 
 function categorizeOneDriveItem(item: GraphDriveItem): string {
-  const url = (item.webUrl ?? '').toLowerCase();
   const name = (item.name ?? '').toLowerCase();
-  if (url.includes('sharepoint.com') || url.includes('sharepoint')) return 'sharepoint';
-  if (name.endsWith('.docx') || name.endsWith('.doc') || name.endsWith('.pdf')) return 'docs';
-  if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) return 'docs';
-  if (name.endsWith('.pptx') || name.endsWith('.ppt')) return 'docs';
-  return 'reference';
+  if (name.endsWith('.docx') || name.endsWith('.doc')) return 'Word';
+  if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) return 'Excel';
+  if (name.endsWith('.pptx') || name.endsWith('.ppt')) return 'PowerPoint';
+  if (name.endsWith('.pdf')) return 'PDF';
+  return 'Other';
 }
 
 function tagsFromDriveItem(item: GraphDriveItem): string[] {

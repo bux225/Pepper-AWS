@@ -104,6 +104,17 @@ export function isTokenExpired(token: StoredToken): boolean {
   return new Date(token.expiresAt).getTime() - bufferMs < Date.now();
 }
 
+export function getMsalCache(accountId: string): string | null {
+  const db = getDb();
+  const row = db.prepare('SELECT msal_cache FROM account_tokens WHERE account_id = ?').get(accountId) as { msal_cache: string | null } | undefined;
+  return row?.msal_cache ?? null;
+}
+
+export function saveMsalCache(accountId: string, cache: string): void {
+  const db = getDb();
+  db.prepare(`UPDATE account_tokens SET msal_cache = ?, updated_at = datetime('now') WHERE account_id = ?`).run(cache, accountId);
+}
+
 // === Poll watermarks ===
 
 export interface PollWatermark {

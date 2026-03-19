@@ -27,8 +27,8 @@ export async function GET() {
     ).get(cutoff.toISOString()) as { cnt: number })?.cnt ?? 0;
 
     return NextResponse.json({
-      lastIngest,
-      lastTodoScan,
+      lastIngest: lastIngest ? lastIngest.replace(' ', 'T') + 'Z' : null,
+      lastTodoScan: lastTodoScan ? lastTodoScan.replace(' ', 'T') + 'Z' : null,
       docsLast7Days: docs7d,
     });
   } catch (err) {
