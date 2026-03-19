@@ -1,0 +1,13 @@
+The todos are doing poorly.  I'm getting:
+- action items for other people
+- redundant action items over and over
+- vague action items
+
+I know extracting my todo's from a bunch of unstructured data is tough but I want to see
+if we can get better.
+
+First, does my aws storage keep tract of ingests?   I definetly only want recommended
+todo's (and follow ups and reference links) to be extracted from any new set of Ingested
+mail/chats.
+
+Can you help me with prompt engineering and any other ideas to improve the todo list?
