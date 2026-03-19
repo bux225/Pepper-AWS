@@ -1,3 +1,13 @@
-curl -X POST http://localhost:3000/api/urls \
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % curl -X POST http://localhost:3000/api/urls \
   -H 'Content-Type: application/json' \
   -d '{"action": "clear-onedrive"}'
+{"deleted":253}%     
+
+   GET /api/urls?status=recommended&limit=100 200 in 9ms (compile: 6ms, render: 3ms)
+{"level":"info","time":"2026-03-19T16:56:18.276Z","pid":64946,"hostname":"CA002-M-CRFGXM6Y6V","name":"BD M365","clientId":"4aaf6921-aeb9-4e02-a32f-d674c42ee111","tenant":"94c3e67c-9e2d-4800-a6b7-635d97882165","msg":"Creating MSAL confidential client"}
+ GET /api/digest?latest=1 200 in 7.4s (compile: 956ms, render: 6.4s)
+ POST /api/urls 200 in 33.1s (compile: 4ms, render: 33.1s)
+{"level":"info","time":"2026-03-19T16:56:51.336Z","pid":64946,"hostname":"CA002-M-CRFGXM6Y6V","module":"reference-links","owned":200,"ownedSkipped":29,"shared":193,"sharedSkipped":160,"searchTotal":57215,"ownedImported":0,"sharedImported":31,"msg":"OneDrive sync complete"}
+{"level":"info","time":"2026-03-19T16:56:51.336Z","pid":64946,"hostname":"CA002-M-CRFGXM6Y6V","module":"reference-links","imported":31,"msg":"OneDrive sync complete"}
+ GET /api/urls?status=confirmed&limit=500&sort=last_modified&order=desc 200 in 9ms (compile: 4ms, render: 6ms)
+ GET /api/urls?status=recommended&limit=100 200 in 12ms (compile: 10ms, render: 1931µs)
