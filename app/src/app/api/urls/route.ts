@@ -10,6 +10,7 @@ import {
   bulkDismiss,
   bulkDelete,
   syncOneDriveRecents,
+  clearOneDriveLinks,
 } from '@/lib/reference-links';
 
 export async function GET(request: NextRequest) {
@@ -57,6 +58,11 @@ export async function POST(request: NextRequest) {
 
   if (action === 'sync-onedrive') {
     const result = await syncOneDriveRecents();
+    return NextResponse.json(result);
+  }
+
+  if (action === 'clear-onedrive') {
+    const result = clearOneDriveLinks();
     return NextResponse.json(result);
   }
 

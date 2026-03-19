@@ -188,6 +188,15 @@ export function bulkDelete(ids: string[]): number {
   return changed;
 }
 
+/** Delete all OneDrive-sourced URL references (both owned and shared). */
+export function clearOneDriveLinks(): { deleted: number } {
+  const db = getDb();
+  const result = db.prepare(
+    "DELETE FROM urls WHERE source_type IN ('onedrive', 'onedrive-shared')"
+  ).run();
+  return { deleted: result.changes };
+}
+
 // === Upsert helpers ===
 
 /**
@@ -287,11 +296,21 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
       // --- Owned files: /me/drive/root/search(q='') ---
       // This only searches your own OneDrive, so all results are owned.
+      // Filter to Documents/ folder only — skips Attachments, Desktop, Meetings, etc.
       const ownedFiles = await searchDriveFiles(account, 200);
       let ownedImported = 0;
+      let ownedSkipped = 0;
 
       for (const item of ownedFiles) {
         if (!item.webUrl || item.folder) continue;
+
+        // Only import files under /Documents
+        const parentPath = item.parentReference?.path ?? '';
+        if (!parentPath.includes('/Documents')) {
+          ownedSkipped++;
+          continue;
+        }
+
         const id = upsertUrl({
           url: item.webUrl,
           title: item.name || item.webUrl,
@@ -358,7 +377,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
       imported += ownedImported + sharedImported;
       log.info(
-        { owned: ownedFiles.length, shared: shared.length, sharedSkipped, searchTotal, ownedImported, sharedImported },
+        { owned: ownedFiles.length, ownedSkipped, shared: shared.length, sharedSkipped, searchTotal, ownedImported, sharedImported },
         'OneDrive sync complete',
       );
     } catch (err) {
