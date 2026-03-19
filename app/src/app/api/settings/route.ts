@@ -29,6 +29,9 @@ export async function PATCH(request: NextRequest) {
   if (parsed.data.knowledgeBases !== undefined) {
     config.knowledgeBases = parsed.data.knowledgeBases;
   }
+  if (parsed.data.sharePointAllowlist !== undefined) {
+    config.sharePointAllowlist = parsed.data.sharePointAllowlist;
+  }
   saveConfig(config);
   return NextResponse.json({ ok: true });
 }

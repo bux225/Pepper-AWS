@@ -225,6 +225,20 @@ export async function fetchSharedWithMe(account: AccountConfig): Promise<GraphDr
   return data.value;
 }
 
+/** List children of a OneDrive folder. Pass '' or '/' for root. */
+export async function listDriveChildren(
+  account: AccountConfig,
+  folderPath: string,
+): Promise<GraphDriveItem[]> {
+  const segment = folderPath && folderPath !== '/'
+    ? `/me/drive/root:/${encodeURIComponent(folderPath)}:/children`
+    : '/me/drive/root/children';
+  const select = 'name,webUrl,folder,parentReference,lastModifiedDateTime,size';
+  const res = await graphFetch(account, `${segment}?$select=${encodeURIComponent(select)}&$top=200`);
+  const data = await res.json() as GraphDriveItemResponse;
+  return data.value;
+}
+
 export async function fetchMyDriveId(account: AccountConfig): Promise<string> {
   const res = await graphFetch(account, '/me/drive?$select=id');
   const data = await res.json() as { id: string };

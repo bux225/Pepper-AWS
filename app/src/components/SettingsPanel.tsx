@@ -39,6 +39,12 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const [kbSaving, setKbSaving] = useState(false);
   const [kbMessage, setKbMessage] = useState('');
 
+  // SharePoint allowlist state
+  const [sharePointAllowlist, setSharePointAllowlist] = useState<string[]>([]);
+  const [newSitePattern, setNewSitePattern] = useState('');
+  const [allowlistSaving, setAllowlistSaving] = useState(false);
+  const [allowlistMessage, setAllowlistMessage] = useState('');
+
   // Add form state
   const [newName, setNewName] = useState('');
   const [newClientId, setNewClientId] = useState('');
@@ -66,6 +72,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
       const data = await res.json();
       setEmailRulesText(data.review?.emailRulesText ?? '');
       setKnowledgeBases(data.knowledgeBases ?? []);
+      setSharePointAllowlist(data.sharePointAllowlist ?? []);
     } catch (err) {
       console.error('Failed to load settings:', err);
     } finally {
@@ -545,6 +552,104 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
                 </div>
                 <button
                   onClick={() => removeKnowledgeBase(kb.id)}
+                  className="ml-3 rounded-lg px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* SharePoint Site Allowlist */}
+      <section className="mb-8">
+        <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">SharePoint Site Allowlist</h3>
+        <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
+          When syncing shared files, only files from known contacts or matching these site patterns are imported. Add SharePoint site names or URL fragments to allow.
+        </p>
+
+        <div className="mb-3 flex gap-2">
+          <input
+            value={newSitePattern}
+            onChange={e => setNewSitePattern(e.target.value)}
+            placeholder="e.g., sites/MyTeamSite or sharepoint.com/sites/Projects"
+            className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+            onKeyDown={e => {
+              if (e.key === 'Enter' && newSitePattern.trim()) {
+                const updated = [...sharePointAllowlist, newSitePattern.trim()];
+                setSharePointAllowlist(updated);
+                setNewSitePattern('');
+                setAllowlistSaving(true);
+                fetch('/api/settings', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sharePointAllowlist: updated }),
+                }).then(res => {
+                  setAllowlistMessage(res.ok ? 'Saved' : 'Error saving');
+                  setTimeout(() => setAllowlistMessage(''), 2000);
+                }).finally(() => setAllowlistSaving(false));
+              }
+            }}
+          />
+          <button
+            onClick={() => {
+              if (!newSitePattern.trim()) return;
+              const updated = [...sharePointAllowlist, newSitePattern.trim()];
+              setSharePointAllowlist(updated);
+              setNewSitePattern('');
+              setAllowlistSaving(true);
+              fetch('/api/settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sharePointAllowlist: updated }),
+              }).then(res => {
+                setAllowlistMessage(res.ok ? 'Saved' : 'Error saving');
+                setTimeout(() => setAllowlistMessage(''), 2000);
+              }).finally(() => setAllowlistSaving(false));
+            }}
+            disabled={!newSitePattern.trim() || allowlistSaving}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Add
+          </button>
+        </div>
+
+        {allowlistMessage && (
+          <p className={`mb-3 text-xs ${allowlistMessage.startsWith('Error') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+            {allowlistMessage}
+          </p>
+        )}
+
+        {sharePointAllowlist.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-zinc-300 py-6 text-center dark:border-zinc-700">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">No site patterns configured.</p>
+            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+              Shared files will only be imported from your known contacts.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {sharePointAllowlist.map((pattern, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-2 dark:border-zinc-700"
+              >
+                <span className="text-sm font-mono text-zinc-700 dark:text-zinc-300">{pattern}</span>
+                <button
+                  onClick={() => {
+                    const updated = sharePointAllowlist.filter((_, i) => i !== idx);
+                    setSharePointAllowlist(updated);
+                    setAllowlistSaving(true);
+                    fetch('/api/settings', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ sharePointAllowlist: updated }),
+                    }).then(res => {
+                      setAllowlistMessage(res.ok ? 'Removed' : 'Error saving');
+                      setTimeout(() => setAllowlistMessage(''), 2000);
+                    }).finally(() => setAllowlistSaving(false));
+                  }}
                   className="ml-3 rounded-lg px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
                 >
                   Remove

@@ -90,6 +90,7 @@ export interface AppConfig {
   userName?: string;
   userEmail?: string;
   knowledgeBases?: CustomKnowledgeBase[];
+  sharePointAllowlist?: string[];
   polling: {
     emailIntervalSeconds: number;
     teamsIntervalSeconds: number;

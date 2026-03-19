@@ -9,7 +9,7 @@ import {
   classifyDriveFiles,
   type GraphDriveItem,
 } from './graph';
-import { getEnabledAccounts } from './config.node';
+import { getEnabledAccounts, loadConfig } from './config.node';
 import logger from './logger';
 
 const log = logger.child({ module: 'reference-links' });
@@ -315,37 +315,35 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
       // Classify to extract only shared items (driveId ≠ mine)
       const { shared } = classifyDriveFiles(searchResults, myDriveId, myUserId);
 
-      // DEBUG: Log a sample of shared files so we can see what fields are available for filtering
-      log.info(
-        {
-          totalSearchResults: searchResults.length,
-          sharedCount: shared.length,
-          sample: shared.slice(0, 10).map(item => {
-            const r = item.remoteItem ?? item;
-            return {
-              name: r.name,
-              webUrl: r.webUrl,
-              size: r.size,
-              mimeType: r.file?.mimeType,
-              createdBy: r.createdBy,
-              lastModifiedBy: r.lastModifiedBy,
-              parentPath: r.parentReference?.path,
-              parentName: r.parentReference?.name,
-              parentDriveId: r.parentReference?.driveId,
-              createdDateTime: r.createdDateTime,
-              lastModifiedDateTime: r.lastModifiedDateTime,
-              hasRemoteItem: !!item.remoteItem,
-            };
-          }),
-        },
-        'DEBUG: shared file sample — check these fields for better filtering',
+      // --- Filtering: people filter + SharePoint site allowlist ---
+      const db = getDb();
+      const knownEmails = new Set<string>(
+        (db.prepare('SELECT DISTINCT lower(email) as email FROM people WHERE email IS NOT NULL').all() as { email: string }[])
+          .map(r => r.email),
       );
+      const config = loadConfig();
+      const siteAllowlist = (config.sharePointAllowlist ?? []).map(s => s.toLowerCase());
 
       let sharedImported = 0;
+      let sharedSkipped = 0;
 
       for (const item of shared) {
         const resolved = item.remoteItem ?? item;
         if (!resolved.webUrl || resolved.folder) continue;
+
+        const creatorEmail = resolved.createdBy?.user?.email?.toLowerCase();
+        const webUrlLower = resolved.webUrl.toLowerCase();
+
+        // Accept if creator is a known contact
+        const fromKnownPerson = !!creatorEmail && knownEmails.has(creatorEmail);
+        // Accept if URL matches an allowlisted SharePoint site
+        const onAllowlistedSite = siteAllowlist.length > 0 && siteAllowlist.some(site => webUrlLower.includes(site));
+
+        if (!fromKnownPerson && !onAllowlistedSite) {
+          sharedSkipped++;
+          continue;
+        }
+
         const id = upsertUrl({
           url: resolved.webUrl,
           title: resolved.name || resolved.webUrl,
@@ -360,7 +358,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
       imported += ownedImported + sharedImported;
       log.info(
-        { owned: ownedFiles.length, shared: shared.length, searchTotal, ownedImported, sharedImported },
+        { owned: ownedFiles.length, shared: shared.length, sharedSkipped, searchTotal, ownedImported, sharedImported },
         'OneDrive sync complete',
       );
     } catch (err) {

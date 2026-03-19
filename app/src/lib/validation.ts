@@ -52,6 +52,9 @@ export const settingsSchema = z.object({
     description: z.string().max(1000).optional().default(''),
     kbId: z.string().min(1).max(100),
   })).max(20).optional(),
+  sharePointAllowlist: z.array(
+    z.string().min(1).max(500)
+  ).max(50).optional(),
 });
 
 // === Note schemas ===
