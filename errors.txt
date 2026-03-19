@@ -1,1 +1,3 @@
-curl http://localhost:3000/api/debug/onedrive-tree | python3 -m json.tool
+curl -X POST http://localhost:3000/api/urls \
+  -H 'Content-Type: application/json' \
+  -d '{"action": "clear-onedrive"}

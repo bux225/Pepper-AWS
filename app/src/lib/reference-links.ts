@@ -191,8 +191,12 @@ export function bulkDelete(ids: string[]): number {
 /** Delete all OneDrive-sourced URL references (both owned and shared). */
 export function clearOneDriveLinks(): { deleted: number } {
   const db = getDb();
+  // Delete by source_type AND by URL pattern (catches legacy rows imported as 'manual')
   const result = db.prepare(
-    "DELETE FROM urls WHERE source_type IN ('onedrive', 'onedrive-shared')"
+    `DELETE FROM urls WHERE source_type IN ('onedrive', 'onedrive-shared')
+       OR url LIKE '%sharepoint.com%'
+       OR url LIKE '%1drv.ms%'
+       OR url LIKE '%my.sharepoint.com%'`
   ).run();
   return { deleted: result.changes };
 }
