@@ -247,8 +247,16 @@ export default function TodoPanel() {
       {/* Ingest status */}
       {(lastIngest || lastScan) && (
         <div className="flex items-center gap-3 border-b border-zinc-100 px-4 py-1.5 text-[11px] text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
-          {lastIngest && <span>Last ingest: {new Date(lastIngest).toLocaleString()}</span>}
-          {lastScan && <span>Last scan: {new Date(lastScan).toLocaleString()}</span>}
+          {lastIngest && (
+            <span>
+              Last ingest: {new Date(lastIngest).toLocaleString(undefined, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}
+            </span>
+          )}
+          {lastScan && (
+            <span>
+              Last scan: {new Date(lastScan).toLocaleString(undefined, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}
+            </span>
+          )}
         </div>
       )}
 
