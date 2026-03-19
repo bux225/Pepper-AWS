@@ -255,12 +255,15 @@ export async function fetchMyUserId(account: AccountConfig): Promise<string> {
  * Search all files in the user's OneDrive using the search endpoint.
  * Paginates through all pages up to `maxItems` results.
  */
-export async function searchDriveFiles(account: AccountConfig, maxItems = 200): Promise<GraphDriveItem[]> {
+export async function searchDriveFiles(account: AccountConfig, maxItems = 200, folderPath?: string): Promise<GraphDriveItem[]> {
   const select = 'name,webUrl,remoteItem,parentReference,createdBy,lastModifiedDateTime,createdDateTime,size,file,folder';
   const pageSize = Math.min(maxItems, 200);
   const all: GraphDriveItem[] = [];
 
-  let url: string | null = `/me/drive/root/search(q='')?$top=${pageSize}&$select=${encodeURIComponent(select)}`;
+  const root = folderPath
+    ? `/me/drive/root:/${encodeURIComponent(folderPath)}:/search(q='')`
+    : `/me/drive/root/search(q='')`;
+  let url: string | null = `${root}?$top=${pageSize}&$select=${encodeURIComponent(select)}`;
 
   while (url && all.length < maxItems) {
     const isFullUrl = url.startsWith('http');

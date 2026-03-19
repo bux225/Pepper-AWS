@@ -298,23 +298,12 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
         fetchMyUserId(account),
       ]);
 
-      // --- Owned files: /me/drive/root/search(q='') ---
-      // This only searches your own OneDrive, so all results are owned.
-      // Filter to Documents/ folder only — skips Attachments, Desktop, Meetings, etc.
-      const ownedFiles = await searchDriveFiles(account, 200);
+      // --- Owned files: search within Documents folder only ---
+      const ownedFiles = await searchDriveFiles(account, 200, 'Documents');
       let ownedImported = 0;
-      let ownedSkipped = 0;
 
       for (const item of ownedFiles) {
         if (!item.webUrl || item.folder) continue;
-
-        // Only import files under the user's Documents folder.
-        // OneDrive URLs use /Documents/ as the root, so the actual Documents
-        // folder appears as /Documents/Documents/ in the URL.
-        if (!item.webUrl.includes('/Documents/Documents/')) {
-          ownedSkipped++;
-          continue;
-        }
 
         const id = upsertUrl({
           url: item.webUrl,
@@ -382,7 +371,7 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
       imported += ownedImported + sharedImported;
       log.info(
-        { owned: ownedFiles.length, ownedSkipped, shared: shared.length, sharedSkipped, searchTotal, ownedImported, sharedImported },
+        { owned: ownedFiles.length, shared: shared.length, sharedSkipped, searchTotal, ownedImported, sharedImported },
         'OneDrive sync complete',
       );
     } catch (err) {

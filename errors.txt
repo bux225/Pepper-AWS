@@ -1,3 +1,3 @@
 curl -X POST http://localhost:3000/api/urls \
   -H 'Content-Type: application/json' \
-  -d '{"action": "clear-onedrive"}
+  -d '{"action": "clear-onedrive"}'
