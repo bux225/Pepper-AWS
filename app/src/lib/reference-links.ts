@@ -314,6 +314,33 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
 
       // Classify to extract only shared items (driveId ≠ mine)
       const { shared } = classifyDriveFiles(searchResults, myDriveId, myUserId);
+
+      // DEBUG: Log a sample of shared files so we can see what fields are available for filtering
+      log.info(
+        {
+          totalSearchResults: searchResults.length,
+          sharedCount: shared.length,
+          sample: shared.slice(0, 10).map(item => {
+            const r = item.remoteItem ?? item;
+            return {
+              name: r.name,
+              webUrl: r.webUrl,
+              size: r.size,
+              mimeType: r.file?.mimeType,
+              createdBy: r.createdBy,
+              lastModifiedBy: r.lastModifiedBy,
+              parentPath: r.parentReference?.path,
+              parentName: r.parentReference?.name,
+              parentDriveId: r.parentReference?.driveId,
+              createdDateTime: r.createdDateTime,
+              lastModifiedDateTime: r.lastModifiedDateTime,
+              hasRemoteItem: !!item.remoteItem,
+            };
+          }),
+        },
+        'DEBUG: shared file sample — check these fields for better filtering',
+      );
+
       let sharedImported = 0;
 
       for (const item of shared) {
