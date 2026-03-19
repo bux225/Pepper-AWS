@@ -1,5 +1,6 @@
 import { getDb } from './db';
 import { extractJson } from './bedrock-llm';
+import { loadConfig } from './config.node';
 import logger from './logger';
 import type { FollowUp } from './types';
 
@@ -104,17 +105,24 @@ export async function detectEmailFollowUps(
     people: e.people,
   }));
 
-  const systemPrompt = `You analyze emails to detect follow-up needs. For each email, determine if:
-1. "awaiting_reply" — The user sent this or promised something, and is waiting for a response from someone else.
-2. "needs_response" — Someone asked the user a question, made a request, or is waiting for the user to act.
-3. "none" — No follow-up needed (newsletters, FYI, automated notifications, completed threads).
+  const config = loadConfig();
+  const userName = config.userName ?? 'the user';
+  const userEmail = config.userEmail ?? '';
+
+  const systemPrompt = `You analyze emails to detect follow-up needs for ${userName} (${userEmail}).
+
+For each email, determine if:
+1. "awaiting_reply" — ${userName} sent something or made a request, and is waiting for a response from someone else.
+2. "needs_response" — Someone asked ${userName} a question, made a request, or is waiting for ${userName} to act.
+3. "none" — No follow-up needed (newsletters, FYI, automated notifications, completed threads, casual conversation).
 
 Return strict JSON:
 {"follow_ups":[{"docId":"id","direction":"awaiting_reply|needs_response","contactName":"person name","contactEmail":"email","summary":"brief description"}]}
 
 Rules:
-- Only flag genuine pending items where someone is waiting
+- Only flag genuine pending items where someone is actively waiting
 - Skip automated emails, newsletters, and completed conversations
+- Skip casual messages like "thanks", "sounds good", "got it"
 - Keep summaries concise (under 80 chars)
 - If no follow-ups exist, return {"follow_ups":[]}
 

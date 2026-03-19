@@ -80,6 +80,8 @@ export interface AccountConfig {
 
 export interface AppConfig {
   accounts: AccountConfig[];
+  userName?: string;
+  userEmail?: string;
   polling: {
     emailIntervalSeconds: number;
     teamsIntervalSeconds: number;
