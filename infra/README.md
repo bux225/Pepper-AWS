@@ -97,3 +97,81 @@ You still need to:
 3. **Add remaining `.env.local` values**: `MS_CLIENT_SECRET`, `TOKEN_ENCRYPTION_KEY`, `LOG_LEVEL`
 4. **Run the app**: `cd app && npm install && npm run dev`
 5. **Connect Microsoft account** in Settings
+
+## Adding Custom Knowledge Bases
+
+You can create additional Bedrock Knowledge Bases for topic-specific document collections (e.g., product docs, internal wikis). Pepper's agent will search these alongside the main KB.
+
+### 1. Create an S3 bucket for your documents
+
+```bash
+aws s3 mb s3://my-product-docs-kb --region us-west-2
+# Upload your documents
+aws s3 sync ./my-docs/ s3://my-product-docs-kb/
+```
+
+### 2. Create the KB in AWS
+
+You can use the AWS Console (Bedrock → Knowledge bases → Create) or add to your Terraform:
+
+```hcl
+# In infra/main.tf — add after the existing KB resources
+
+resource "aws_bedrockagent_knowledge_base" "custom_example" {
+  name        = "${local.prefix}-custom-kb"
+  description = "Product documentation knowledge base"
+  role_arn    = aws_iam_role.bedrock_kb.arn   # reuse the existing KB role
+
+  knowledge_base_configuration {
+    type = "VECTOR"
+    vector_knowledge_base_configuration {
+      embedding_model_arn = "arn:aws:bedrock:${local.region}::foundation-model/${var.embedding_model_id}"
+    }
+  }
+
+  storage_configuration {
+    type = "OPENSEARCH_SERVERLESS"
+    opensearch_serverless_configuration {
+      collection_arn    = aws_opensearchserverless_collection.kb.arn  # reuse the vector store
+      vector_index_name = "custom-kb-index"
+      field_mapping {
+        vector_field   = "bedrock-knowledge-base-default-vector"
+        text_field     = "AMAZON_BEDROCK_TEXT_CHUNK"
+        metadata_field = "AMAZON_BEDROCK_METADATA"
+      }
+    }
+  }
+}
+
+resource "aws_bedrockagent_data_source" "custom_example" {
+  knowledge_base_id = aws_bedrockagent_knowledge_base.custom_example.id
+  name              = "${local.prefix}-custom-s3-source"
+  data_source_configuration {
+    type = "S3"
+    s3_configuration {
+      bucket_arn = "arn:aws:s3:::my-product-docs-kb"  # your bucket
+    }
+  }
+}
+```
+
+> **Note:** If using a separate S3 bucket, add `s3:GetObject` and `s3:ListBucket` permissions for the new bucket to the `bedrock_kb_s3` IAM policy.
+
+### 3. Sync the KB
+
+After creating the data source, trigger an initial sync:
+
+```bash
+aws bedrock-agent start-ingestion-job \
+  --knowledge-base-id YOUR_KB_ID \
+  --data-source-id YOUR_DATA_SOURCE_ID
+```
+
+### 4. Register in Pepper
+
+Go to **Settings → Custom Knowledge Bases → + Add KB** and enter:
+- **Name**: A descriptive name (e.g., "Product Docs")
+- **Bedrock Knowledge Base ID**: The KB ID from AWS
+- **Description**: What this KB contains (helps the agent decide when to search it)
+
+The agent will now automatically search this KB alongside your main one when you ask questions.

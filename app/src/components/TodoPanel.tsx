@@ -43,6 +43,19 @@ export default function TodoPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [lastIngest, setLastIngest] = useState<string | null>(null);
+  const [lastScan, setLastScan] = useState<string | null>(null);
+
+  const fetchIngestStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/ingest/status');
+      if (res.ok) {
+        const data = await res.json();
+        setLastIngest(data.lastIngest);
+        setLastScan(data.lastTodoScan);
+      }
+    } catch { /* non-critical */ }
+  }, []);
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -78,6 +91,10 @@ export default function TodoPanel() {
   useEffect(() => {
     fetchSuggested();
   }, [fetchSuggested]);
+
+  useEffect(() => {
+    fetchIngestStatus();
+  }, [fetchIngestStatus]);
 
   const approveTodo = async (id: string) => {
     try {
@@ -173,7 +190,7 @@ export default function TodoPanel() {
     setScanning(true);
     try {
       await fetch('/api/todos/extract', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } });
-      await Promise.all([fetchTodos(), fetchSuggested()]);
+      await Promise.all([fetchTodos(), fetchSuggested(), fetchIngestStatus()]);
     } catch { /* silent */ } finally {
       setScanning(false);
     }
@@ -226,6 +243,14 @@ export default function TodoPanel() {
           </button>
         </div>
       </div>
+
+      {/* Ingest status */}
+      {(lastIngest || lastScan) && (
+        <div className="flex items-center gap-3 border-b border-zinc-100 px-4 py-1.5 text-[11px] text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+          {lastIngest && <span>Last ingest: {new Date(lastIngest).toLocaleString()}</span>}
+          {lastScan && <span>Last scan: {new Date(lastScan).toLocaleString()}</span>}
+        </div>
+      )}
 
       {/* Add form */}
       {showAddForm && (

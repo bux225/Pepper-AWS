@@ -46,6 +46,12 @@ export const settingsSchema = z.object({
   review: z.object({
     emailRulesText: z.string().max(10000).optional(),
   }).optional(),
+  knowledgeBases: z.array(z.object({
+    id: z.string().min(1).max(100),
+    name: z.string().min(1).max(200),
+    description: z.string().max(1000).optional().default(''),
+    kbId: z.string().min(1).max(100),
+  })).max(20).optional(),
 });
 
 // === Note schemas ===

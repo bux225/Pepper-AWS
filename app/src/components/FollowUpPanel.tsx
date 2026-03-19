@@ -18,6 +18,17 @@ export default function FollowUpPanel() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'waiting' | 'resolved' | 'dismissed'>('waiting');
   const [scanning, setScanning] = useState(false);
+  const [lastIngest, setLastIngest] = useState<string | null>(null);
+
+  const fetchIngestStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/ingest/status');
+      if (res.ok) {
+        const data = await res.json();
+        setLastIngest(data.lastIngest);
+      }
+    } catch { /* non-critical */ }
+  }, []);
 
   const fetchFollowUps = useCallback(async () => {
     setLoading(true);
@@ -37,6 +48,10 @@ export default function FollowUpPanel() {
   useEffect(() => {
     fetchFollowUps();
   }, [fetchFollowUps]);
+
+  useEffect(() => {
+    fetchIngestStatus();
+  }, [fetchIngestStatus]);
 
   const updateStatus = async (id: number, status: 'resolved' | 'dismissed') => {
     try {
@@ -65,7 +80,7 @@ export default function FollowUpPanel() {
               setScanning(true);
               try {
                 await fetch('/api/follow-ups', { method: 'POST', headers: { 'X-Pepper-Internal': '1' } });
-                await fetchFollowUps();
+                await Promise.all([fetchFollowUps(), fetchIngestStatus()]);
               } catch { /* silent */ } finally {
                 setScanning(false);
               }
@@ -91,6 +106,13 @@ export default function FollowUpPanel() {
           ))}
         </div>
       </div>
+
+      {/* Ingest status */}
+      {lastIngest && (
+        <div className="border-b border-zinc-100 px-4 py-1.5 text-[11px] text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+          Last ingest: {new Date(lastIngest).toLocaleString()}
+        </div>
+      )}
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">

@@ -30,6 +30,15 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const [rulesSaving, setRulesSaving] = useState(false);
   const [rulesMessage, setRulesMessage] = useState('');
 
+  // Knowledge Base state
+  const [knowledgeBases, setKnowledgeBases] = useState<Array<{id: string; name: string; description: string; kbId: string}>>([]);
+  const [showAddKb, setShowAddKb] = useState(false);
+  const [newKbName, setNewKbName] = useState('');
+  const [newKbId, setNewKbId] = useState('');
+  const [newKbDescription, setNewKbDescription] = useState('');
+  const [kbSaving, setKbSaving] = useState(false);
+  const [kbMessage, setKbMessage] = useState('');
+
   // Add form state
   const [newName, setNewName] = useState('');
   const [newClientId, setNewClientId] = useState('');
@@ -56,6 +65,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
       if (!res.ok) throw new Error('Failed to load settings');
       const data = await res.json();
       setEmailRulesText(data.review?.emailRulesText ?? '');
+      setKnowledgeBases(data.knowledgeBases ?? []);
     } catch (err) {
       console.error('Failed to load settings:', err);
     } finally {
@@ -138,6 +148,52 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     } finally {
       setRulesSaving(false);
     }
+  };
+
+  const addKnowledgeBase = async () => {
+    if (!newKbName.trim() || !newKbId.trim()) return;
+    setKbSaving(true);
+    setKbMessage('');
+    try {
+      const newKb = {
+        id: crypto.randomUUID(),
+        name: newKbName.trim(),
+        description: newKbDescription.trim(),
+        kbId: newKbId.trim(),
+      };
+      const updated = [...knowledgeBases, newKb];
+      const res = await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ knowledgeBases: updated }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setKnowledgeBases(updated);
+      setNewKbName('');
+      setNewKbId('');
+      setNewKbDescription('');
+      setShowAddKb(false);
+      setKbMessage('Knowledge base added!');
+      setTimeout(() => setKbMessage(''), 3000);
+    } catch (err) {
+      setKbMessage(`Error: ${err instanceof Error ? err.message : 'failed to save'}`);
+    } finally {
+      setKbSaving(false);
+    }
+  };
+
+  const removeKnowledgeBase = async (id: string) => {
+    if (!confirm('Remove this knowledge base from Pepper? (This does not delete the KB in AWS.)')) return;
+    const updated = knowledgeBases.filter(kb => kb.id !== id);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ knowledgeBases: updated }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setKnowledgeBases(updated);
+    } catch { /* silent */ }
   };
 
   return (
@@ -393,6 +449,110 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
             </>
           )}
         </div>
+      </section>
+
+      {/* Knowledge Bases */}
+      <section className="mb-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Custom Knowledge Bases</h3>
+          <button
+            onClick={() => setShowAddKb(!showAddKb)}
+            className="rounded-lg px-3 py-1 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+          >
+            {showAddKb ? 'Cancel' : '+ Add KB'}
+          </button>
+        </div>
+
+        <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
+          Register additional Bedrock Knowledge Bases for topic-specific documents. The agent will search these alongside your main KB.
+        </p>
+
+        {showAddKb && (
+          <div className="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">Name</label>
+                <input
+                  value={newKbName}
+                  onChange={e => setNewKbName(e.target.value)}
+                  placeholder="e.g., Product Documentation"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Bedrock Knowledge Base ID
+                  <span className="ml-1 font-normal text-zinc-400">(from AWS console)</span>
+                </label>
+                <input
+                  value={newKbId}
+                  onChange={e => setNewKbId(e.target.value)}
+                  placeholder="XXXXXXXXXX"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-mono text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Description
+                  <span className="ml-1 font-normal text-zinc-400">(helps the agent decide when to search this KB)</span>
+                </label>
+                <input
+                  value={newKbDescription}
+                  onChange={e => setNewKbDescription(e.target.value)}
+                  placeholder="e.g., Internal product specs, API docs, and architecture decisions"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+              <button
+                onClick={addKnowledgeBase}
+                disabled={!newKbName.trim() || !newKbId.trim() || kbSaving}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {kbSaving ? 'Adding…' : 'Add Knowledge Base'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {kbMessage && (
+          <p className={`mb-3 text-xs ${kbMessage.startsWith('Error') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+            {kbMessage}
+          </p>
+        )}
+
+        {knowledgeBases.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-zinc-300 py-6 text-center dark:border-zinc-700">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">No custom knowledge bases configured.</p>
+            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+              Create a Bedrock KB in AWS, then register it here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {knowledgeBases.map(kb => (
+              <div
+                key={kb.id}
+                className="flex items-center justify-between rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-700"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{kb.name}</span>
+                    <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{kb.kbId}</span>
+                  </div>
+                  {kb.description && (
+                    <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">{kb.description}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => removeKnowledgeBase(kb.id)}
+                  className="ml-3 rounded-lg px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Setup Guide */}

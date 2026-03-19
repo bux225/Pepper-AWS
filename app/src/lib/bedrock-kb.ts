@@ -74,8 +74,22 @@ export async function retrieve(
     filters?: Record<string, unknown>;
   },
 ): Promise<KbRetrievalResult[]> {
+  return retrieveFromKb(getKbId(), query, options);
+}
+
+/**
+ * Retrieve relevant documents from a specific Knowledge Base by ID.
+ */
+export async function retrieveFromKb(
+  knowledgeBaseId: string,
+  query: string,
+  options?: {
+    topK?: number;
+    filters?: Record<string, unknown>;
+  },
+): Promise<KbRetrievalResult[]> {
   const response = await runtimeClient.send(new RetrieveCommand({
-    knowledgeBaseId: getKbId(),
+    knowledgeBaseId,
     retrievalQuery: { text: query },
     retrievalConfiguration: {
       vectorSearchConfiguration: {

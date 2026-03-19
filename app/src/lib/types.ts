@@ -78,10 +78,18 @@ export interface AccountConfig {
   enabled: boolean;
 }
 
+export interface CustomKnowledgeBase {
+  id: string;
+  name: string;
+  description: string;
+  kbId: string;
+}
+
 export interface AppConfig {
   accounts: AccountConfig[];
   userName?: string;
   userEmail?: string;
+  knowledgeBases?: CustomKnowledgeBase[];
   polling: {
     emailIntervalSeconds: number;
     teamsIntervalSeconds: number;

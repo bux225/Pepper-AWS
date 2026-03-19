@@ -1,5 +1,6 @@
 import type { AgentActionRequest } from './bedrock-agent';
-import { retrieve } from './bedrock-kb';
+import { retrieve, retrieveFromKb } from './bedrock-kb';
+import { loadConfig } from './config.node';
 import { ingestNote } from './s3-ingest';
 import { createTodo, listTodos, updateTodo, getTodoById } from './todos';
 import { createOutboxItem } from './outbox';
@@ -56,13 +57,43 @@ async function handleSearchKnowledge(params: Record<string, string>): Promise<st
     limit: params.limit ? Number(params.limit) : undefined,
   });
 
-  const results = await retrieve(args.query, { topK: args.limit ?? 10 });
+  const topK = args.limit ?? 10;
+
+  // Search the primary KB
+  const mainResults = await retrieve(args.query, { topK });
+
+  // Search any custom KBs configured by the user
+  const config = loadConfig();
+  const customKbs = config.knowledgeBases ?? [];
+
+  const customResults: Array<{ source: string; content: string; location?: string; score?: number }> = [];
+
+  if (customKbs.length > 0) {
+    const customSearches = customKbs.map(async (kb) => {
+      try {
+        const results = await retrieveFromKb(kb.kbId, args.query, { topK: Math.min(topK, 5) });
+        return results.map(r => ({
+          source: kb.name,
+          content: r.content.slice(0, 2000),
+          location: r.location,
+          score: r.score,
+        }));
+      } catch (err) {
+        logger.warn({ kbId: kb.kbId, kbName: kb.name, err }, 'Custom KB search failed');
+        return [];
+      }
+    });
+    const allCustom = await Promise.all(customSearches);
+    customResults.push(...allCustom.flat());
+  }
+
   return JSON.stringify({
-    results: results.map(r => ({
+    results: mainResults.map(r => ({
       content: r.content.slice(0, 2000),
       location: r.location,
       score: r.score,
     })),
+    ...(customResults.length > 0 ? { customKbResults: customResults } : {}),
   });
 }
 

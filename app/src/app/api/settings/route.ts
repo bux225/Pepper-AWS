@@ -26,6 +26,9 @@ export async function PATCH(request: NextRequest) {
   if (parsed.data.review) {
     config.review = { ...config.review, ...parsed.data.review };
   }
+  if (parsed.data.knowledgeBases !== undefined) {
+    config.knowledgeBases = parsed.data.knowledgeBases;
+  }
   saveConfig(config);
   return NextResponse.json({ ok: true });
 }
