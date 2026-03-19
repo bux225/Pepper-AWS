@@ -305,25 +305,13 @@ export async function syncOneDriveRecents(): Promise<{ imported: number; errors:
       let ownedImported = 0;
       let ownedSkipped = 0;
 
-      // DEBUG: log sample parentReference.path values to see actual format
-      log.info(
-        {
-          samplePaths: ownedFiles.slice(0, 15).map(item => ({
-            name: item.name,
-            parentPath: item.parentReference?.path,
-            parentName: item.parentReference?.name,
-            webUrl: item.webUrl?.slice(0, 80),
-          })),
-        },
-        'DEBUG: owned file parentReference paths',
-      );
-
       for (const item of ownedFiles) {
         if (!item.webUrl || item.folder) continue;
 
-        // Only import files under /Documents
-        const parentPath = item.parentReference?.path ?? '';
-        if (!parentPath.includes('/Documents')) {
+        // Only import files under the user's Documents folder.
+        // OneDrive URLs use /Documents/ as the root, so the actual Documents
+        // folder appears as /Documents/Documents/ in the URL.
+        if (!item.webUrl.includes('/Documents/Documents/')) {
           ownedSkipped++;
           continue;
         }
