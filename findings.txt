@@ -1,14 +1,653 @@
-do you see an ingested note from today on my meeting with chee
-searchKnowledge(10, note meeting Chee today March 19 2026)
-I don't see a dedicated note from today (March 19, 2026) about a meeting with Chee in your knowledge base. The most recent content I found related to Chee from today is a Teams chat message where you mentioned "I'm showing Chee unavailable on the 25th at 7am."
+ll completed"}
+ POST /api/poll/email 200 in 16.2s (compile: 7ms, render: 16.2s)
+{"level":"info","time":"2026-03-20T18:05:16.175Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","messageId":"AAMkAGUwM2ZmNDcwLTZhOTAtNGU3Zi1iZTdjLWUxMjdlYTcyOGU2MABGAAAAAADzkAlxbWMUSoXMLqEEtPqQBwCZgR0rsSl5R6YtX-i6YcovAAAAAAEMAACZgR0rsSl5R6YtX-i6YcovAAGGTVGvAAA=","subject":"Notes","msg":"Ingested email to S3"}
+{"level":"info","time":"2026-03-20T18:05:16.202Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:05:16.204Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":1,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1513ms (compile: 16ms, render: 1497ms)
+{"level":"info","time":"2026-03-20T18:10:01.538Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"A0JVIIMEOK","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T18:10:01.538Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"A0JVIIMEOK","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T18:10:01.540Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"A0JVIIMEOK","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.0s (compile: 5ms, render: 12.0s)
+{"level":"info","time":"2026-03-20T18:10:12.058Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.7s (compile: 21ms, render: 17.7s)
+{"level":"info","time":"2026-03-20T18:10:17.766Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:10:17.769Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/note 201 in 627ms (compile: 314ms, render: 313ms)
+{"level":"info","time":"2026-03-20T18:13:15.463Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","title":"1:1 with Chee","msg":"Ingested note to S3"}
+{"level":"info","time":"2026-03-20T18:13:15.463Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","title":"1:1 with Chee","s3Key":"notes/4d499ae7-4a9a-4409-a75e-a82309a12110.txt","msg":"Note ingested"}
+ GET /api/todos?status=open&limit=500 200 in 23ms (compile: 11ms, render: 11ms)
+ GET /api/todos?status=suggested&limit=50 200 in 25ms (compile: 23ms, render: 1972µs)
+ GET /api/ingest/status 200 in 19ms (compile: 11ms, render: 9ms)
+ GET /api/todos?status=open&limit=500 200 in 2ms (compile: 909µs, render: 1408µs)
+ GET /api/todos?status=suggested&limit=50 200 in 5ms (compile: 3ms, render: 1650µs)
+ GET /api/ingest/status 200 in 4ms (compile: 3ms, render: 1264µs)
+{"level":"info","time":"2026-03-20T18:13:16.510Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"C35GV3JRRG","msg":"Started KB ingestion sync"}
+ POST /api/todos/extract 200 in 3.2s (compile: 6ms, render: 3.1s)
+{"level":"info","time":"2026-03-20T18:13:45.132Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":0,"skippedDup":0,"msg":"Todo extraction completed"}
+ GET /api/todos?status=open&limit=500 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /api/todos?status=suggested&limit=50 200 in 9ms (compile: 7ms, render: 2ms)
+ GET /api/ingest/status 200 in 3ms (compile: 1029µs, render: 1870µs)
+ PATCH /api/todos/e7e8e494-94d3-437d-a2bd-84ae346d339f 200 in 41ms (compile: 18ms, render: 23ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 1820µs, render: 4ms)
+ GET /api/follow-ups?status=waiting 200 in 8ms (compile: 3ms, render: 4ms)
+ GET /api/ingest/status 200 in 4ms (compile: 1389µs, render: 2ms)
+ GET /api/follow-ups?status=waiting 200 in 5ms (compile: 3ms, render: 2ms)
+ GET /api/ingest/status 200 in 3ms (compile: 1305µs, render: 1923µs)
+ GET /api/todos?status=open&limit=500 200 in 10ms (compile: 5ms, render: 5ms)
+ GET /api/todos?status=suggested&limit=50 200 in 14ms (compile: 11ms, render: 3ms)
+ GET /api/ingest/status 200 in 18ms (compile: 15ms, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 3ms (compile: 1424µs, render: 1998µs)
+ GET /api/todos?status=suggested&limit=50 200 in 7ms (compile: 4ms, render: 3ms)
+ GET /api/ingest/status 200 in 3ms (compile: 930µs, render: 2ms)
+ POST /api/todos/extract 200 in 4.3s (compile: 2ms, render: 4.3s)
+{"level":"info","time":"2026-03-20T18:15:04.301Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","id":"76ffda8c-2e3c-47c6-bcaa-ac10c529a1f4","title":"Remove draft text from PMR slides if ready for tomorrow's meeting","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T18:15:04.303Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":1,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T18:15:04.307Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":1,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 5.6s (compile: 4ms, render: 5.6s)
+{"level":"info","time":"2026-03-20T18:15:05.599Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T18:15:05.603Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 13.4s (compile: 8ms, render: 13.4s)
+{"level":"info","time":"2026-03-20T18:15:13.401Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 20.9s (compile: 1780µs, render: 20.9s)
+{"level":"info","time":"2026-03-20T18:15:20.905Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:15:20.906Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1481ms (compile: 4ms, render: 1478ms)
+{"level":"info","time":"2026-03-20T18:20:01.500Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"VYOTLV1EVH","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T18:20:01.500Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"VYOTLV1EVH","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T18:20:01.506Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"VYOTLV1EVH","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.2s (compile: 6ms, render: 11.2s)
+{"level":"info","time":"2026-03-20T18:20:11.263Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 16.6s (compile: 9ms, render: 16.6s)
+{"level":"info","time":"2026-03-20T18:20:16.609Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:20:16.611Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 10.8s (compile: 12ms, render: 10.8s)
+{"level":"info","time":"2026-03-20T18:25:10.787Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 16.5s (compile: 4ms, render: 16.5s)
+{"level":"info","time":"2026-03-20T18:25:16.567Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:25:16.569Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/import/edge-history 200 in 29ms (compile: 11ms, render: 19ms)
+{"level":"info","time":"2026-03-20T18:30:00.100Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"edge-history","imported":0,"skipped":9,"total":91,"msg":"Edge history import complete"}
+{"level":"info","time":"2026-03-20T18:30:00.122Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/import/edge-history","data":{"imported":0,"skipped":9,"errors":[]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1541ms (compile: 30ms, render: 1512ms)
+{"level":"info","time":"2026-03-20T18:30:01.564Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"P0PMN98MXO","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T18:30:01.564Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"P0PMN98MXO","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T18:30:01.568Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"P0PMN98MXO","status":"started"},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 4.3s (compile: 33ms, render: 4.2s)
+{"level":"info","time":"2026-03-20T18:30:04.346Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","id":"5290ee76-39a2-4050-9957-d19d4ebd7927","title":"Provide NPD investment numbers for ASR slides (2026-2029)","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T18:30:04.347Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":1,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T18:30:04.352Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":1,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 5.9s (compile: 11ms, render: 5.9s)
+{"level":"info","time":"2026-03-20T18:30:05.893Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T18:30:05.899Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 3.1s (compile: 4ms, render: 3.1s)
+{"level":"info","time":"2026-03-20T18:30:10.789Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":0,"skippedDup":0,"msg":"Todo extraction completed"}
+ GET /api/todos?status=open&limit=500 200 in 24ms (compile: 14ms, render: 10ms)
+ GET /api/todos?status=suggested&limit=50 200 in 28ms (compile: 25ms, render: 4ms)
+ GET /api/ingest/status 200 in 44ms (compile: 36ms, render: 8ms)
+ POST /api/poll/teams 200 in 13.4s (compile: 6ms, render: 13.4s)
+{"level":"info","time":"2026-03-20T18:30:13.436Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.0s (compile: 42ms, render: 15.0s)
+{"level":"info","time":"2026-03-20T18:30:15.059Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:30:15.061Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ PATCH /api/todos/76ffda8c-2e3c-47c6-bcaa-ac10c529a1f4 200 in 35ms (compile: 19ms, render: 16ms)
+ GET /api/todos?status=open&limit=500 200 in 6ms (compile: 1732µs, render: 4ms)
+ GET /api/todos?status=suggested&limit=50 200 in 11ms (compile: 7ms, render: 3ms)
+ PATCH /api/todos/5290ee76-39a2-4050-9957-d19d4ebd7927 200 in 33ms (compile: 6ms, render: 27ms)
+ GET /api/todos?status=open&limit=500 200 in 5ms (compile: 2ms, render: 3ms)
+ GET /api/todos?status=suggested&limit=50 200 in 8ms (compile: 6ms, render: 2ms)
+ GET /api/follow-ups?status=waiting 200 in 12ms (compile: 5ms, render: 7ms)
+ GET /api/ingest/status 200 in 16ms (compile: 12ms, render: 4ms)
+ GET /api/follow-ups?status=waiting 200 in 5ms (compile: 1916µs, render: 3ms)
+ GET /api/ingest/status 200 in 8ms (compile: 5ms, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 11ms (compile: 5ms, render: 7ms)
+ GET /api/todos?status=suggested&limit=50 200 in 15ms (compile: 12ms, render: 2ms)
+ GET /api/ingest/status 200 in 18ms (compile: 15ms, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1561µs, render: 3ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 5ms, render: 1620µs)
+ GET /api/ingest/status 200 in 9ms (compile: 7ms, render: 2ms)
+{"level":"info","time":"2026-03-20T18:31:10.376Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+ POST /api/chat 200 in 17.0s (compile: 133ms, render: 16.9s)
+ GET /api/chat/sessions 200 in 23ms (compile: 13ms, render: 9ms)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1874µs, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 5ms, render: 1371µs)
+ GET /api/ingest/status 200 in 10ms (compile: 7ms, render: 2ms)
+ GET /api/todos?status=open&limit=500 200 in 3ms (compile: 1061µs, render: 1725µs)
+ GET /api/todos?status=suggested&limit=50 200 in 4ms (compile: 3ms, render: 1190µs)
+ GET /api/ingest/status 200 in 2ms (compile: 722µs, render: 1289µs)
+ GET /api/digest?latest=1 200 in 3.9s (compile: 11ms, render: 3.9s)
+ GET /api/digest?latest=1 200 in 6.5s (compile: 1911µs, render: 6.5s)
+{"level":"info","time":"2026-03-20T18:31:55.555Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+ POST /api/chat?sessionId=7908ae39-aa10-4534-bd5d-6c057e235e71 200 in 11.3s (compile: 3ms, render: 11.3s)
+ GET /api/chat/sessions 200 in 5ms (compile: 1724µs, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1765µs, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 8ms (compile: 5ms, render: 2ms)
+ GET /api/ingest/status 200 in 7ms (compile: 5ms, render: 2ms)
+ GET /api/todos?status=open&limit=500 200 in 5ms (compile: 4ms, render: 1681µs)
+ GET /api/todos?status=suggested&limit=50 200 in 5ms (compile: 3ms, render: 1522µs)
+ GET /api/ingest/status 200 in 6ms (compile: 4ms, render: 1938µs)
+ GET /api/digest?latest=1 200 in 3.9s (compile: 4ms, render: 3.8s)
+ GET /api/digest?latest=1 200 in 6.9s (compile: 3ms, render: 6.9s)
+{"level":"info","time":"2026-03-20T18:33:02.622Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+ POST /api/chat?sessionId=7908ae39-aa10-4534-bd5d-6c057e235e71 200 in 15.5s (compile: 5ms, render: 15.5s)
+ GET /api/chat/sessions 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1926µs, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 4ms, render: 1515µs)
+ GET /api/ingest/status 200 in 4ms (compile: 1737µs, render: 2ms)
+ GET /api/todos?status=open&limit=500 200 in 3ms (compile: 1372µs, render: 1288µs)
+ GET /api/todos?status=suggested&limit=50 200 in 4ms (compile: 3ms, render: 1238µs)
+ GET /api/ingest/status 200 in 4ms (compile: 3ms, render: 1458µs)
+ GET /api/digest?latest=1 200 in 6.0s (compile: 4ms, render: 6.0s)
+ GET /api/digest?latest=1 200 in 6.8s (compile: 1716µs, render: 6.8s)
+{"level":"info","time":"2026-03-20T18:33:24.529Z","pid":9677,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+ POST /api/chat?sessionId=7908ae39-aa10-4534-bd5d-6c057e235e71 200 in 17.1s (compile: 4ms, render: 17.1s)
+ GET /api/chat/sessions 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /api/todos?status=open&limit=500 200 in 3ms (compile: 1241µs, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 4ms, render: 1514µs)
+ GET /api/ingest/status 200 in 4ms (compile: 1695µs, render: 2ms)
+ GET /api/todos?status=open&limit=500 200 in 2ms (compile: 1086µs, render: 1372µs)
+ GET /api/todos?status=suggested&limit=50 200 in 5ms (compile: 3ms, render: 1797µs)
+ GET /api/ingest/status 200 in 5ms (compile: 3ms, render: 1379µs)
+ GET /api/digest?latest=1 200 in 4.1s (compile: 5ms, render: 4.1s)
+ GET /api/digest?latest=1 200 in 4.1s (compile: 1995µs, render: 4.1s)
+^C
+11041685@CA002-M-CRFGXM6Y6V app % cd ..
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % git add .
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % git commit -m "findings"
+[main aee66d0] findings
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % git push
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 847 bytes | 847.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/bux225/Pepper-AWS.git
+   cd6c194..aee66d0  main -> main
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % npm run dev
+npm error code ENOENT
+npm error syscall open
+npm error path /Users/11041685/Development/Pepper-AWS/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/Users/11041685/Development/Pepper-AWS/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /Users/11041685/.npm/_logs/2026-03-20T18_40_43_537Z-debug-0.log
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % cd app 
+11041685@CA002-M-CRFGXM6Y6V app % npm run dev
 
-The action items I extracted earlier were from what appears to be older meeting notes with Chee that included items like the R&R completion by Gary and the investment proposal due by Feb 23rd.
+> pepper-aws@0.1.0 dev
+> next dev
 
-If you had a meeting with Chee today and took notes, they may not have been ingested into your knowledge base yet, or they might be saved in a location that hasn't been indexed.
-today is march 20
-searchKnowledge(10, meeting note Chee March 20 2026)
-I don't see any meeting notes from today (March 20, 2026) with Chee in your knowledge base. The search results show various documents and emails from earlier dates, but no specific meeting notes from today.
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.68.56:3000
+- Environments: .env.local
 
-The most recent Chee-related content appears to be from March 19th (a Teams chat about Chee's availability) and March 17th (emails about scheduling conflicts). 
+✓ Starting...
+{"level":"info","time":"2026-03-20T18:40:53.748Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","cron":"*/5 * * * *","intervalSec":300,"msg":"Scheduled email polling"}
+{"level":"info","time":"2026-03-20T18:40:53.749Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","cron":"*/5 * * * *","intervalSec":300,"msg":"Scheduled Teams polling"}
+{"level":"info","time":"2026-03-20T18:40:53.749Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled Edge history sync every 30 minutes"}
+{"level":"info","time":"2026-03-20T18:40:53.750Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled ingestion analysis every 10 minutes"}
+{"level":"info","time":"2026-03-20T18:40:53.751Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled morning digest daily at 7:00 AM"}
+{"level":"info","time":"2026-03-20T18:40:53.752Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled follow-up detection every 15 minutes"}
+{"level":"info","time":"2026-03-20T18:40:53.752Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled todo extraction every 15 minutes"}
+{"level":"info","time":"2026-03-20T18:40:53.752Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Background scheduler started"}
+✓ Ready in 2.9s
+ POST /api/ingest/analyze 200 in 2.7s (compile: 1385ms, render: 1290ms)
+{"level":"info","time":"2026-03-20T18:41:13.563Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"VXN9RN9IMS","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T18:41:13.563Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"VXN9RN9IMS","msg":"KB sync triggered"}
+ GET / 200 in 1035ms (compile: 965ms, render: 70ms)
+ GET /api/ingest/status 200 in 168ms (compile: 137ms, render: 32ms)
+ GET /api/chat/sessions 200 in 238ms (compile: 236ms, render: 2ms)
+ GET /api/todos?status=open&limit=500 200 in 260ms (compile: 257ms, render: 3ms)
+ GET /api/todos?status=suggested&limit=50 200 in 261ms (compile: 260ms, render: 1243µs)
+ GET /api/digest?latest=1 200 in 7.5s (compile: 200ms, render: 7.3s)
+ POST /api/todos/extract 200 in 4.2s (compile: 130ms, render: 4.1s)
+{"level":"info","time":"2026-03-20T18:44:54.402Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","id":"6dbc6769-9149-4bcd-a173-111bdf8c2b4f","title":"Complete RoHS Directive Compliance Process training","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T18:44:54.404Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":1,"skippedDup":0,"msg":"Todo extraction completed"}
+ GET /api/todos?status=open&limit=500 200 in 8ms (compile: 3ms, render: 5ms)
+ GET /api/todos?status=suggested&limit=50 200 in 14ms (compile: 10ms, render: 3ms)
+ GET /api/ingest/status 200 in 10ms (compile: 7ms, render: 2ms)
+{"level":"info","time":"2026-03-20T18:45:00.741Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","name":"BD M365","clientId":"4aaf6921-aeb9-4e02-a32f-d674c42ee111","tenant":"94c3e67c-9e2d-4800-a6b7-635d97882165","msg":"Creating MSAL confidential client"}
+ POST /api/todos/extract 200 in 3.6s (compile: 1108µs, render: 3.6s)
+{"level":"info","time":"2026-03-20T18:45:03.578Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":0,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T18:45:03.581Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":0,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 6.6s (compile: 385ms, render: 6.2s)
+{"level":"info","time":"2026-03-20T18:45:06.584Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T18:45:06.587Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ PATCH /api/todos/6dbc6769-9149-4bcd-a173-111bdf8c2b4f 200 in 1908ms (compile: 1901ms, render: 6ms)
+ PATCH /api/todos/6dbc6769-9149-4bcd-a173-111bdf8c2b4f 200 in 37ms (compile: 30ms, render: 6ms)
+ GET /api/todos?status=suggested&limit=50 200 in 3ms (compile: 943µs, render: 1611µs)
+ GET /api/todos?status=suggested&limit=50 200 in 2ms (compile: 838µs, render: 1497µs)
+ GET /api/follow-ups?status=waiting 200 in 8ms (compile: 4ms, render: 5ms)
+ GET /api/ingest/status 200 in 13ms (compile: 10ms, render: 3ms)
+ GET /api/follow-ups?status=waiting 200 in 5ms (compile: 2ms, render: 3ms)
+ GET /api/ingest/status 200 in 8ms (compile: 6ms, render: 2ms)
+ POST /api/poll/teams 200 in 12.8s (compile: 736ms, render: 12.1s)
+{"level":"info","time":"2026-03-20T18:45:12.844Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ GET /api/todos?status=open&limit=500 200 in 6ms (compile: 3ms, render: 4ms)
+ GET /api/todos?status=suggested&limit=50 200 in 9ms (compile: 7ms, render: 2ms)
+ GET /api/ingest/status 200 in 12ms (compile: 10ms, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1615µs, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 4ms, render: 1552µs)
+ GET /api/ingest/status 200 in 4ms (compile: 3ms, render: 1442µs)
+ POST /api/poll/email 200 in 18.8s (compile: 713ms, render: 18.1s)
+{"level":"info","time":"2026-03-20T18:45:18.804Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:45:18.806Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/chat 200 in 9.8s (compile: 137ms, render: 9.7s)
+ GET /api/chat/sessions 200 in 9ms (compile: 4ms, render: 5ms)
+ POST /api/chat?sessionId=6324333b-a103-4d2b-9ac2-6bbf70f6af61 200 in 11.5s (compile: 3ms, render: 11.4s)
+ GET /api/chat/sessions 200 in 4ms (compile: 1671µs, render: 3ms)
+{"level":"info","time":"2026-03-20T18:47:05.145Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+{"level":"info","time":"2026-03-20T18:47:10.915Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","actionGroup":"pepper-tools","function":"searchKnowledge","msg":"Handling ROC action"}
+ POST /api/chat?sessionId=6324333b-a103-4d2b-9ac2-6bbf70f6af61 200 in 18.2s (compile: 4ms, render: 18.2s)
+ GET /api/chat/sessions 200 in 8ms (compile: 3ms, render: 5ms)
+ GET /api/todos?status=open&limit=500 200 in 5ms (compile: 1816µs, render: 4ms)
+ GET /api/todos?status=suggested&limit=50 200 in 8ms (compile: 6ms, render: 1860µs)
+ GET /api/ingest/status 200 in 4ms (compile: 2ms, render: 1991µs)
+ GET /api/todos?status=open&limit=500 200 in 9ms (compile: 8ms, render: 1570µs)
+ GET /api/todos?status=suggested&limit=50 200 in 11ms (compile: 10ms, render: 1193µs)
+ GET /api/ingest/status 200 in 3ms (compile: 891µs, render: 1828µs)
+ GET /api/digest?latest=1 200 in 3.9s (compile: 5ms, render: 3.9s)
+ GET /api/digest?latest=1 200 in 6.3s (compile: 1881µs, render: 6.3s)
+ POST /api/note 201 in 368ms (compile: 108ms, render: 260ms)
+{"level":"info","time":"2026-03-20T18:49:45.839Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","title":"1:1 with Chee","msg":"Ingested note to S3"}
+{"level":"info","time":"2026-03-20T18:49:45.839Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","title":"1:1 with Chee","s3Key":"notes/58092248-94ff-4874-8dc2-798ae17a1a7a.txt","msg":"Note ingested"}
+ GET /api/todos?status=open&limit=500 200 in 6ms (compile: 1947µs, render: 4ms)
+ GET /api/todos?status=suggested&limit=50 200 in 5ms (compile: 2ms, render: 3ms)
+ GET /api/ingest/status 200 in 8ms (compile: 6ms, render: 1918µs)
+ GET /api/todos?status=open&limit=500 200 in 4ms (compile: 1771µs, render: 1876µs)
+ GET /api/todos?status=suggested&limit=50 200 in 2ms (compile: 780µs, render: 1299µs)
+ GET /api/ingest/status 200 in 5ms (compile: 3ms, render: 1569µs)
+{"level":"info","time":"2026-03-20T18:49:47.074Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"YJBP6CHFZI","msg":"Started KB ingestion sync"}
+ POST /api/ingest/analyze 200 in 702ms (compile: 8ms, render: 694ms)
+{"level":"info","time":"2026-03-20T18:50:00.734Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","msg":"KB sync already in progress, skipping"}
+{"level":"info","time":"2026-03-20T18:50:00.734Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"ALREADY_RUNNING","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T18:50:00.738Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"ALREADY_RUNNING","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.6s (compile: 3ms, render: 12.6s)
+{"level":"info","time":"2026-03-20T18:50:12.603Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 14.2s (compile: 9ms, render: 14.2s)
+{"level":"info","time":"2026-03-20T18:50:14.233Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:50:14.237Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 13.0s (compile: 3ms, render: 13.0s)
+{"level":"info","time":"2026-03-20T18:55:12.992Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.8s (compile: 9ms, render: 15.8s)
+{"level":"info","time":"2026-03-20T18:55:15.839Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T18:55:15.841Z","pid":13098,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+^C
+11041685@CA002-M-CRFGXM6Y6V app % cd ..      
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % git pull
+remote: Enumerating objects: 15, done.
+remote: Counting objects: 100% (15/15), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 9 (delta 5), reused 9 (delta 5), pack-reused 0 (from 0)
+Unpacking objects: 100% (9/9), 2.50 KiB | 150.00 KiB/s, done.
+From https://github.com/bux225/Pepper-AWS
+   aee66d0..4b8180d  main       -> origin/main
+Updating aee66d0..4b8180d
+Fast-forward
+ app/src/lib/bedrock-kb.ts  | 13 +++++++++++--
+ scripts/create-dock-app.sh | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ scripts/pepper-server.sh   | 58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 121 insertions(+), 2 deletions(-)
+ create mode 100755 scripts/create-dock-app.sh
+ create mode 100755 scripts/pepper-server.sh
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % cd scripts 
+11041685@CA002-M-CRFGXM6Y6V scripts % ls
+create-dock-app.sh      pepper-server.sh        setup-action-group.sh
+11041685@CA002-M-CRFGXM6Y6V scripts % ./ create-dock-app.sh 
+zsh: permission denied: ./
+11041685@CA002-M-CRFGXM6Y6V scripts % ls       
+create-dock-app.sh      pepper-server.sh        setup-action-group.sh
+11041685@CA002-M-CRFGXM6Y6V scripts % create-dock-app.sh
+zsh: command not found: create-dock-app.sh
+11041685@CA002-M-CRFGXM6Y6V scripts % ./create-dock-app.sh 
+.: replacing existing signature
+✅  Created /Users/11041685/Applications/Pepper.app
 
-If you had a meeting with Chee today and took notes, they may not have been ingested into your knowledge base yet. Would you like me to help you create a note with the meeting details and action items you remember?
+Next steps:
+  1. Open Finder → Go → Home → Applications
+  2. Drag 'Pepper.app' to your Dock
+  3. Double-click (or click in Dock) to start Pepper
+  4. Right-click the Dock icon → Quit to stop the server
+
+Server logs: /tmp/pepper-server.log
+11041685@CA002-M-CRFGXM6Y6V scripts % git pull
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (14/14), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 8 (delta 5), reused 8 (delta 5), pack-reused 0 (from 0)
+Unpacking objects: 100% (8/8), 2.47 KiB | 68.00 KiB/s, done.
+From https://github.com/bux225/Pepper-AWS
+   4b8180d..06bda06  main       -> origin/main
+Updating 4b8180d..06bda06
+Fast-forward
+ app/scripts/fix-metadata.cjs | 101 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ app/src/lib/s3-client.ts     |  43 ++++++++++++++++++++++++++++--
+ 2 files changed, 142 insertions(+), 2 deletions(-)
+ create mode 100644 app/scripts/fix-metadata.cjs
+11041685@CA002-M-CRFGXM6Y6V scripts % cd ...
+cd: no such file or directory: ...
+11041685@CA002-M-CRFGXM6Y6V scripts % cd ..
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % git pull
+Already up to date.
+11041685@CA002-M-CRFGXM6Y6V Pepper-AWS % cd app 
+11041685@CA002-M-CRFGXM6Y6V app % npm run dev
+
+> pepper-aws@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.68.56:3000
+- Environments: .env.local
+
+✓ Starting...
+{"level":"info","time":"2026-03-20T19:31:57.436Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","cron":"*/5 * * * *","intervalSec":300,"msg":"Scheduled email polling"}
+{"level":"info","time":"2026-03-20T19:31:57.436Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","cron":"*/5 * * * *","intervalSec":300,"msg":"Scheduled Teams polling"}
+{"level":"info","time":"2026-03-20T19:31:57.437Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled Edge history sync every 30 minutes"}
+{"level":"info","time":"2026-03-20T19:31:57.438Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled ingestion analysis every 10 minutes"}
+{"level":"info","time":"2026-03-20T19:31:57.438Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled morning digest daily at 7:00 AM"}
+{"level":"info","time":"2026-03-20T19:31:57.439Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled follow-up detection every 15 minutes"}
+{"level":"info","time":"2026-03-20T19:31:57.439Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Scheduled todo extraction every 15 minutes"}
+{"level":"info","time":"2026-03-20T19:31:57.439Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","msg":"Background scheduler started"}
+✓ Ready in 2.6s
+ GET / 200 in 1551ms (compile: 1488ms, render: 63ms)
+ GET /api/ingest/status 200 in 570ms (compile: 525ms, render: 45ms)
+ GET /api/chat/sessions 200 in 600ms (compile: 597ms, render: 3ms)
+ GET /api/todos?status=open&limit=500 200 in 655ms (compile: 653ms, render: 2ms)
+ GET /api/todos?status=suggested&limit=50 200 in 656ms (compile: 655ms, render: 1083µs)
+ GET /api/digest?latest=1 200 in 4.5s (compile: 630ms, render: 3.9s)
+ GET / 200 in 45ms (compile: 25ms, render: 20ms)
+ GET /api/todos?status=open&limit=500 200 in 3ms (compile: 1677µs, render: 1777µs)
+ GET /api/todos?status=suggested&limit=50 200 in 5ms (compile: 4ms, render: 1253µs)
+ GET /api/ingest/status 200 in 7ms (compile: 6ms, render: 1624µs)
+ GET /api/chat/sessions 200 in 13ms (compile: 11ms, render: 1836µs)
+ GET /api/digest?latest=1 200 in 6.0s (compile: 8ms, render: 6.0s)
+{"level":"info","time":"2026-03-20T19:35:01.368Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","name":"BD M365","clientId":"4aaf6921-aeb9-4e02-a32f-d674c42ee111","tenant":"94c3e67c-9e2d-4800-a6b7-635d97882165","msg":"Creating MSAL confidential client"}
+ POST /api/poll/teams 200 in 13.5s (compile: 1345ms, render: 12.2s)
+{"level":"info","time":"2026-03-20T19:35:13.545Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.4s (compile: 1376ms, render: 16.0s)
+{"level":"info","time":"2026-03-20T19:35:17.369Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T19:35:17.373Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ PATCH /api/todos/c810f061-5fb8-4e9e-9d94-120c298863d3 200 in 719ms (compile: 714ms, render: 5ms)
+ GET /api/todos?status=suggested&limit=50 200 in 3ms (compile: 1166µs, render: 2ms)
+ PATCH /api/todos/739dbe63-2b2e-4ebb-84cb-22c121318b73 200 in 12ms (compile: 8ms, render: 5ms)
+ GET /api/todos?status=suggested&limit=50 200 in 4ms (compile: 1777µs, render: 2ms)
+ PATCH /api/todos/e1e3ada4-81e7-4de9-ace8-a2ef9f691eeb 200 in 12ms (compile: 6ms, render: 6ms)
+ GET /api/todos?status=suggested&limit=50 200 in 8ms (compile: 3ms, render: 4ms)
+ PATCH /api/todos/15caf1e1-510a-4238-aca9-b51eb9a169dc 200 in 22ms (compile: 8ms, render: 14ms)
+ GET /api/todos?status=suggested&limit=50 200 in 6ms (compile: 2ms, render: 4ms)
+ PATCH /api/todos/93be817e-12ca-4c17-96d3-dc95a06e3a99 200 in 14ms (compile: 8ms, render: 6ms)
+ GET /api/todos?status=suggested&limit=50 200 in 9ms (compile: 3ms, render: 5ms)
+ POST /api/chat 200 in 7.3s (compile: 177ms, render: 7.1s)
+ GET /api/chat/sessions 200 in 8ms (compile: 3ms, render: 5ms)
+ POST /api/todos 201 in 11ms (compile: 4ms, render: 8ms)
+{"level":"info","time":"2026-03-20T19:36:39.501Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"96758fd0-e789-4c6b-ab3f-e9150bfe8e9e","title":"Resolve ownership of capital depreciation - Follow up on your meeting with German to get clarity on this issue","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T19:36:39.501Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"96758fd0-e789-4c6b-ab3f-e9150bfe8e9e","title":"Resolve ownership of capital depreciation - Follow up on your meeting with German to get clarity on this issue","msg":"Todo created via API"}
+ GET /api/todos?status=open&limit=500 200 in 5ms (compile: 1443µs, render: 3ms)
+ POST /api/todos 201 in 10ms (compile: 4ms, render: 6ms)
+{"level":"info","time":"2026-03-20T19:37:34.715Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"cf247e10-e0ed-4f1b-b5c2-da6f8eaa36da","title":"Investigate weekly way of communicating Dispensing 2.0 to Leadership","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T19:37:34.715Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"cf247e10-e0ed-4f1b-b5c2-da6f8eaa36da","title":"Investigate weekly way of communicating Dispensing 2.0 to Leadership","msg":"Todo created via API"}
+ GET /api/todos?status=open&limit=500 200 in 6ms (compile: 1893µs, render: 4ms)
+ POST /api/ingest/analyze 200 in 1483ms (compile: 47ms, render: 1436ms)
+{"level":"info","time":"2026-03-20T19:40:01.499Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"I9Z8MTRWRT","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T19:40:01.499Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"I9Z8MTRWRT","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T19:40:01.503Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"I9Z8MTRWRT","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.6s (compile: 16ms, render: 12.6s)
+{"level":"info","time":"2026-03-20T19:40:12.602Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 14.2s (compile: 4ms, render: 14.2s)
+{"level":"info","time":"2026-03-20T19:40:14.254Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T19:40:14.255Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 4.4s (compile: 51ms, render: 4.3s)
+{"level":"info","time":"2026-03-20T19:45:04.419Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"69a7f6a7-fcf4-4a54-ba87-2bd0d117bfc4","title":"Verify if capital program extends to FY27 with STS finance team","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T19:45:04.420Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":1,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T19:45:04.425Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":1,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 6.7s (compile: 95ms, render: 6.6s)
+{"level":"info","time":"2026-03-20T19:45:06.685Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T19:45:06.690Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.1s (compile: 1406µs, render: 12.1s)
+{"level":"info","time":"2026-03-20T19:45:12.140Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 19.7s (compile: 3ms, render: 19.7s)
+{"level":"info","time":"2026-03-20T19:45:19.705Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T19:45:19.707Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1472ms (compile: 1475µs, render: 1471ms)
+{"level":"info","time":"2026-03-20T19:50:01.506Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"RKABVVPJTK","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T19:50:01.506Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"RKABVVPJTK","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T19:50:01.510Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"RKABVVPJTK","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.8s (compile: 3ms, render: 12.8s)
+{"level":"info","time":"2026-03-20T19:50:12.858Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.8s (compile: 12ms, render: 15.8s)
+{"level":"info","time":"2026-03-20T19:50:15.861Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T19:50:15.863Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.6s (compile: 4ms, render: 12.6s)
+{"level":"info","time":"2026-03-20T19:55:12.642Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.4s (compile: 13ms, render: 15.4s)
+{"level":"info","time":"2026-03-20T19:55:15.406Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T19:55:15.407Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/import/edge-history 200 in 387ms (compile: 49ms, render: 338ms)
+{"level":"info","time":"2026-03-20T20:00:00.443Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","count":1,"msg":"Ingested browser visits to S3"}
+{"level":"info","time":"2026-03-20T20:00:00.443Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"edge-history","imported":1,"skipped":9,"total":94,"msg":"Edge history import complete"}
+{"level":"info","time":"2026-03-20T20:00:00.451Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/import/edge-history","data":{"imported":1,"skipped":9,"errors":[]},"msg":"Poll completed"}
+{"level":"info","time":"2026-03-20T20:00:01.528Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","attempt":1,"delayMs":30000,"msg":"KB sync already in progress, will retry"}
+ POST /api/ingest/analyze 200 in 1575ms (compile: 2ms, render: 1572ms)
+{"level":"info","time":"2026-03-20T20:00:01.613Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"ZTCCUK1CXA","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:00:01.613Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"ZTCCUK1CXA","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:00:01.614Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"ZTCCUK1CXA","status":"started"},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 3.2s (compile: 4ms, render: 3.2s)
+{"level":"info","time":"2026-03-20T20:00:03.226Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":0,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T20:00:03.232Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":0,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 5.2s (compile: 10ms, render: 5.2s)
+{"level":"info","time":"2026-03-20T20:00:05.223Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T20:00:05.226Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 14.3s (compile: 6ms, render: 14.3s)
+{"level":"info","time":"2026-03-20T20:00:14.324Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 16.1s (compile: 5ms, render: 16.1s)
+{"level":"info","time":"2026-03-20T20:00:16.202Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:00:16.204Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+{"level":"info","time":"2026-03-20T20:00:32.591Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"U5IXROBQE4","msg":"Started KB ingestion sync"}
+ POST /api/poll/teams 200 in 12.5s (compile: 4ms, render: 12.5s)
+{"level":"info","time":"2026-03-20T20:05:12.573Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.7s (compile: 13ms, render: 17.7s)
+{"level":"info","time":"2026-03-20T20:05:17.721Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:05:17.723Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1253ms (compile: 1095µs, render: 1252ms)
+{"level":"info","time":"2026-03-20T20:10:01.295Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"HIKI5JK1TT","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:10:01.295Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"HIKI5JK1TT","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:10:01.298Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"HIKI5JK1TT","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 14.0s (compile: 4ms, render: 14.0s)
+{"level":"info","time":"2026-03-20T20:10:14.052Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.3s (compile: 12ms, render: 15.3s)
+{"level":"info","time":"2026-03-20T20:10:15.299Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:10:15.300Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 6.2s (compile: 21ms, render: 6.2s)
+{"level":"info","time":"2026-03-20T20:15:06.223Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T20:15:06.228Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 7.1s (compile: 11ms, render: 7.1s)
+{"level":"info","time":"2026-03-20T20:15:07.143Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"7f83d784-f31f-4c38-bbdb-9648a3464d13","title":"Complete E-Learning: Protecting Personal Data and Respecting Privacy Rights","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:15:07.144Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"a4ddce31-ae50-4ddb-93a1-91e011853ffc","title":"Provide project contract and RACI model for Pyxis Pro","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:15:07.144Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"642655de-f13d-489a-a974-0feb289c0695","title":"Share Pyxis 2.0 demo script with Daniel Feitelberg","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:15:07.145Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":3,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T20:15:07.149Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":3,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.9s (compile: 4ms, render: 12.9s)
+{"level":"info","time":"2026-03-20T20:15:12.935Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.6s (compile: 32ms, render: 15.5s)
+{"level":"info","time":"2026-03-20T20:15:15.556Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","messageId":"AAMkAGUwM2ZmNDcwLTZhOTAtNGU3Zi1iZTdjLWUxMjdlYTcyOGU2MABGAAAAAADzkAlxbWMUSoXMLqEEtPqQBwCZgR0rsSl5R6YtX-i6YcovAAAAAAEMAACZgR0rsSl5R6YtX-i6YcovAAGGTVGwAAA=","subject":"DHT Sync: Architecture and SLAs for Launch","msg":"Ingested email to S3"}
+{"level":"info","time":"2026-03-20T20:15:15.582Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:15:15.584Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":1,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1307ms (compile: 4ms, render: 1304ms)
+{"level":"info","time":"2026-03-20T20:20:01.331Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"YQP4JRBVZD","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:20:01.331Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"YQP4JRBVZD","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:20:01.335Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"YQP4JRBVZD","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 10.6s (compile: 6ms, render: 10.6s)
+{"level":"info","time":"2026-03-20T20:20:10.625Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 14.8s (compile: 15ms, render: 14.8s)
+{"level":"info","time":"2026-03-20T20:20:14.794Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:20:14.796Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.6s (compile: 12ms, render: 11.6s)
+{"level":"info","time":"2026-03-20T20:25:11.639Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 14.8s (compile: 4ms, render: 14.8s)
+{"level":"info","time":"2026-03-20T20:25:14.798Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:25:14.800Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/import/edge-history 200 in 30ms (compile: 10ms, render: 21ms)
+{"level":"info","time":"2026-03-20T20:30:00.082Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"edge-history","imported":0,"skipped":9,"total":94,"msg":"Edge history import complete"}
+{"level":"info","time":"2026-03-20T20:30:00.084Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/import/edge-history","data":{"imported":0,"skipped":9,"errors":[]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1299ms (compile: 14ms, render: 1285ms)
+{"level":"info","time":"2026-03-20T20:30:01.327Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"OEIFEWAYLS","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:30:01.327Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"OEIFEWAYLS","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:30:01.330Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"OEIFEWAYLS","status":"started"},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 4.3s (compile: 10ms, render: 4.3s)
+{"level":"info","time":"2026-03-20T20:30:04.304Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":0,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T20:30:04.308Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":0,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 5.3s (compile: 3ms, render: 5.3s)
+{"level":"info","time":"2026-03-20T20:30:05.329Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T20:30:05.334Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.8s (compile: 5ms, render: 11.8s)
+{"level":"info","time":"2026-03-20T20:30:11.894Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 21.3s (compile: 7ms, render: 21.3s)
+{"level":"info","time":"2026-03-20T20:30:21.298Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","messageId":"AAMkAGUwM2ZmNDcwLTZhOTAtNGU3Zi1iZTdjLWUxMjdlYTcyOGU2MABGAAAAAADzkAlxbWMUSoXMLqEEtPqQBwCZgR0rsSl5R6YtX-i6YcovAAAAAAEMAACZgR0rsSl5R6YtX-i6YcovAAGGTVGxAAA=","subject":"Thank You for Joining Today’s Design Kickoff- M. Falcon Project","msg":"Ingested email to S3"}
+{"level":"info","time":"2026-03-20T20:30:21.335Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:30:21.337Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":1,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 14.4s (compile: 10ms, render: 14.4s)
+{"level":"info","time":"2026-03-20T20:35:14.410Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 20.7s (compile: 3ms, render: 20.7s)
+{"level":"info","time":"2026-03-20T20:35:20.763Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:35:20.765Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1374ms (compile: 1668µs, render: 1373ms)
+{"level":"info","time":"2026-03-20T20:40:01.404Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"HXCBPAR1TL","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:40:01.404Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"HXCBPAR1TL","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:40:01.408Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"HXCBPAR1TL","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 13.1s (compile: 6ms, render: 13.1s)
+{"level":"info","time":"2026-03-20T20:40:13.098Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 14.9s (compile: 1816µs, render: 14.9s)
+{"level":"info","time":"2026-03-20T20:40:14.933Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:40:14.934Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 6.4s (compile: 4ms, render: 6.4s)
+{"level":"info","time":"2026-03-20T20:45:06.448Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T20:45:06.453Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 7.3s (compile: 6ms, render: 7.3s)
+{"level":"info","time":"2026-03-20T20:45:07.289Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"812e4dd8-2444-4ccc-b9e7-80970e40395f","title":"Provide cross-functional Product Core team input by March 2","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:45:07.289Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"c480bea4-ae52-4189-8ccf-0e8a1ca3086f","title":"Complete BD Personnel SOP training by March 25","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:45:07.290Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"e7d52a62-42e2-4fa5-9562-9eebe50fa8c6","title":"Review and sign pending DocuSign document","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:45:07.290Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"66df80cc-58ed-436c-9bf1-8633b9edeecf","title":"Add Steven Large to Dispensing 2.0 ASR document","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:45:07.290Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"3d380f71-4b33-4eac-b81f-5346252fb7fc","title":"Send list of names to Adam","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T20:45:07.291Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":5,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T20:45:07.295Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":5,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.3s (compile: 888µs, render: 11.3s)
+{"level":"info","time":"2026-03-20T20:45:11.306Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 13.9s (compile: 14ms, render: 13.9s)
+{"level":"info","time":"2026-03-20T20:45:13.970Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:45:13.972Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1292ms (compile: 4ms, render: 1288ms)
+{"level":"info","time":"2026-03-20T20:50:01.309Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"VFJ9WWHAXN","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T20:50:01.309Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"VFJ9WWHAXN","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T20:50:01.314Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"VFJ9WWHAXN","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.7s (compile: 727µs, render: 12.7s)
+{"level":"info","time":"2026-03-20T20:50:12.725Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.4s (compile: 13ms, render: 17.4s)
+{"level":"info","time":"2026-03-20T20:50:17.412Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:50:17.414Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.9s (compile: 11ms, render: 12.9s)
+{"level":"info","time":"2026-03-20T20:55:12.968Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.6s (compile: 3ms, render: 17.6s)
+{"level":"info","time":"2026-03-20T20:55:17.665Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T20:55:17.667Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/import/edge-history 200 in 19ms (compile: 4ms, render: 15ms)
+{"level":"info","time":"2026-03-20T21:00:00.067Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"edge-history","imported":0,"skipped":9,"total":94,"msg":"Edge history import complete"}
+{"level":"info","time":"2026-03-20T21:00:00.073Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/import/edge-history","data":{"imported":0,"skipped":9,"errors":[]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1432ms (compile: 16ms, render: 1415ms)
+{"level":"info","time":"2026-03-20T21:00:01.448Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"EDZOXRUTTS","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T21:00:01.448Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"EDZOXRUTTS","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T21:00:01.452Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"EDZOXRUTTS","status":"started"},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 6.3s (compile: 18ms, render: 6.3s)
+{"level":"info","time":"2026-03-20T21:00:06.344Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"57a9e0e0-2328-4f99-ab36-996503d08eb8","title":"Interview Lauren for R&D Program Manager role on Monday 3/2 at 1pm PST","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:00:06.344Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"282f2e21-d9db-45ef-a9da-2444cd889bab","title":"Join meeting with Kris and Joel to discuss ASR Proposal Doc","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:00:06.344Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"c9073622-f8bc-4385-94fa-b76f4389d1c2","title":"Work with Simon Bello to create plan for $3.5M spend this year","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:00:06.344Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"3bae245b-4e38-4714-be84-e09c271e050d","title":"Coordinate internal meeting on Project Marvel strategic alignment","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:00:06.344Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":4,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T21:00:06.346Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":4,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 6.5s (compile: 4ms, render: 6.5s)
+{"level":"info","time":"2026-03-20T21:00:06.537Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T21:00:06.542Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.8s (compile: 27ms, render: 12.7s)
+{"level":"info","time":"2026-03-20T21:00:12.777Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 13.1s (compile: 5ms, render: 13.1s)
+{"level":"info","time":"2026-03-20T21:00:13.153Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:00:13.155Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 13.5s (compile: 2ms, render: 13.5s)
+{"level":"info","time":"2026-03-20T21:05:13.510Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.8s (compile: 7ms, render: 15.8s)
+{"level":"info","time":"2026-03-20T21:05:15.839Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:05:15.840Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1168ms (compile: 5ms, render: 1163ms)
+{"level":"info","time":"2026-03-20T21:10:01.198Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"QJR7JOQJI1","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T21:10:01.198Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"QJR7JOQJI1","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T21:10:01.202Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"QJR7JOQJI1","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.8s (compile: 2ms, render: 11.8s)
+{"level":"info","time":"2026-03-20T21:10:11.783Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 17.8s (compile: 9ms, render: 17.8s)
+{"level":"info","time":"2026-03-20T21:10:17.865Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:10:17.867Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 5.7s (compile: 4ms, render: 5.7s)
+{"level":"info","time":"2026-03-20T21:15:05.767Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":0,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T21:15:05.769Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":0},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 9.2s (compile: 5ms, render: 9.2s)
+{"level":"info","time":"2026-03-20T21:15:09.231Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"dc638f8f-d22b-4553-8783-47fd5531e843","title":"Complete 0206-003-000-001-R Job Description Template training","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:15:09.232Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"01dbca6a-536e-4a68-bd8b-b9503009dd32","title":"Talk to Greg Dameron about incremental R&D investments","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:15:09.232Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"d0a078ac-9072-462c-bf08-8feaaca2b496","title":"Review SW development with Omar/Gary for Incada + Pyxis 2.0","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:15:09.232Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"c0b612e2-b819-416c-ae84-a75748f1ecd8","title":"Provide feedback on VETS ARG National Meeting slides","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:15:09.233Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":4,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T21:15:09.237Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":4,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.4s (compile: 21ms, render: 11.4s)
+{"level":"info","time":"2026-03-20T21:15:11.479Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 13.6s (compile: 14ms, render: 13.6s)
+{"level":"info","time":"2026-03-20T21:15:13.644Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:15:13.646Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1579ms (compile: 3ms, render: 1577ms)
+{"level":"info","time":"2026-03-20T21:20:01.615Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"7TNITYJ0ZF","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T21:20:01.615Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"7TNITYJ0ZF","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T21:20:01.620Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"7TNITYJ0ZF","status":"started"},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 13.4s (compile: 3ms, render: 13.4s)
+{"level":"info","time":"2026-03-20T21:20:13.419Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:20:13.421Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":0,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 13.6s (compile: 10ms, render: 13.6s)
+{"level":"info","time":"2026-03-20T21:20:13.632Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 11.8s (compile: 3ms, render: 11.8s)
+{"level":"info","time":"2026-03-20T21:25:11.866Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 15.4s (compile: 10ms, render: 15.4s)
+{"level":"info","time":"2026-03-20T21:25:15.399Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","messageId":"AAMkAGUwM2ZmNDcwLTZhOTAtNGU3Zi1iZTdjLWUxMjdlYTcyOGU2MABGAAAAAADzkAlxbWMUSoXMLqEEtPqQBwCZgR0rsSl5R6YtX-i6YcovAAAAAAEMAACZgR0rsSl5R6YtX-i6YcovAAGGTVGyAAA=","subject":"Storyboarding Value Drivers/Customer Experiences for Dispensing 2.0","msg":"Ingested email to S3"}
+{"level":"info","time":"2026-03-20T21:25:15.426Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:25:15.427Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":1,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/import/edge-history 200 in 34ms (compile: 10ms, render: 25ms)
+{"level":"info","time":"2026-03-20T21:30:00.125Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"edge-history","imported":0,"skipped":9,"total":94,"msg":"Edge history import complete"}
+{"level":"info","time":"2026-03-20T21:30:00.129Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/import/edge-history","data":{"imported":0,"skipped":9,"errors":[]},"msg":"Poll completed"}
+ POST /api/ingest/analyze 200 in 1168ms (compile: 49ms, render: 1118ms)
+{"level":"info","time":"2026-03-20T21:30:01.195Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","jobId":"KPPVSFFI7O","msg":"Started KB ingestion sync"}
+{"level":"info","time":"2026-03-20T21:30:01.195Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","syncId":"KPPVSFFI7O","msg":"KB sync triggered"}
+{"level":"info","time":"2026-03-20T21:30:01.196Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/ingest/analyze","data":{"syncId":"KPPVSFFI7O","status":"started"},"msg":"Poll completed"}
+ POST /api/todos/extract 200 in 4.7s (compile: 12ms, render: 4.6s)
+{"level":"info","time":"2026-03-20T21:30:04.678Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","id":"62d9abd8-fd0f-431e-aefa-383803fed0e1","title":"Provide breakdown (periodic table) for Incada and core services","msg":"Todo created"}
+{"level":"info","time":"2026-03-20T21:30:04.680Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":20,"created":1,"skippedDup":0,"msg":"Todo extraction completed"}
+{"level":"info","time":"2026-03-20T21:30:04.685Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/todos/extract","data":{"scanned":20,"created":1,"skippedDup":0},"msg":"Poll completed"}
+ POST /api/follow-ups 200 in 8.3s (compile: 34ms, render: 8.3s)
+{"level":"info","time":"2026-03-20T21:30:08.325Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","scanned":50,"created":1,"msg":"Follow-up detection completed"}
+{"level":"info","time":"2026-03-20T21:30:08.329Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/follow-ups","data":{"scanned":50,"created":1},"msg":"Poll completed"}
+ POST /api/poll/teams 200 in 12.9s (compile: 815µs, render: 12.9s)
+{"level":"info","time":"2026-03-20T21:30:13.034Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/teams","data":{"results":[{"account":"BD M365","imported":0,"errors":[]}]},"msg":"Poll completed"}
+ POST /api/poll/email 200 in 13.8s (compile: 20ms, render: 13.8s)
+{"level":"info","time":"2026-03-20T21:30:13.841Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","messageId":"AAMkAGUwM2ZmNDcwLTZhOTAtNGU3Zi1iZTdjLWUxMjdlYTcyOGU2MABGAAAAAADzkAlxbWMUSoXMLqEEtPqQBwCZgR0rsSl5R6YtX-i6YcovAAAAAAEMAACZgR0rsSl5R6YtX-i6YcovAAGGTVGzAAA=","subject":"Storyboarding Value Drivers/Architecture/Customer Experience Elements for Dispensing 2.0","msg":"Ingested email to S3"}
+{"level":"info","time":"2026-03-20T21:30:13.872Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","dismissed":191,"msg":"Dismissed emails by rules"}
+{"level":"info","time":"2026-03-20T21:30:13.873Z","pid":15443,"hostname":"CA002-M-CRFGXM6Y6V","module":"scheduler","path":"/api/poll/email","data":{"results":[{"account":"BD M365","imported":1,"dismissed":191,"errors":[]}]},"msg":"Poll completed"}
+
+
+
+The "latest ingest" timestamp in your UI may not always match 2026-03-20T21:30:13.841Z (the time an email was ingested) if:
+
+The system only updates "latest ingest" for certain types of ingests (e.g., full analysis runs, not individual emails).
+The backend/API that provides lastIngest is set to the last time a batch ingest or analysis completed, not every single item ingested.
+There is a delay or batching—if multiple emails are ingested in a run, the timestamp may reflect the end of the batch, not each message.
+The UI is showing the last time a specific ingest endpoint (like /api/ingest/analyze) ran, not the last time any item was ingested.
+There is a bug or race condition in how the lastIngest value is set or cached.
+In summary: "Latest ingest" usually reflects the last completed scheduled ingest/analysis, not every individual item. If you want it to reflect every single ingested email, the backend logic would need to update lastIngest on every successful item ingest.
