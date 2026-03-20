@@ -2,7 +2,7 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { detectEmailFollowUps, listFollowUps, updateFollowUpStatus, countFollowUps } from '@/lib/follow-ups';
 import { getDb } from '@/lib/db';
-import { getDocument } from '@/lib/s3-client';
+import { getDocumentText } from '@/lib/s3-client';
 import { rateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
 
@@ -27,16 +27,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Read email documents from S3
-    interface S3Email {
-      type: string;
-      subject: string;
-      from: string;
-      to: string[];
-      body: string;
-      receivedAt: string;
-      conversationId?: string;
-    }
-
     const emails: Array<{
       docId: string;
       subject: string;
@@ -47,21 +37,35 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     for (const row of rows) {
-      const doc = await getDocument<S3Email>(row.s3_key);
-      if (!doc) continue;
+      const raw = await getDocumentText(row.s3_key);
+      if (!raw) continue;
+
+      // Parse structured plain-text headers
+      const lines = raw.split('\n');
+      let subject = '', from = '', to = '', date = '';
+      let bodyStart = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('Subject: ')) subject = lines[i].slice(9);
+        else if (lines[i].startsWith('From: ')) from = lines[i].slice(6);
+        else if (lines[i].startsWith('To: ')) to = lines[i].slice(4);
+        else if (lines[i].startsWith('Date: ')) date = lines[i].slice(6);
+        else if (lines[i] === '' && i > 0) { bodyStart = i + 1; break; }
+      }
+      const body = lines.slice(bodyStart).join('\n');
 
       const people: string[] = [];
-      if (doc.from) people.push(doc.from.replace(/<.*>/, '').trim());
-      if (Array.isArray(doc.to)) {
-        for (const r of doc.to) people.push(r.replace(/<.*>/, '').trim());
+      if (from) people.push(from.replace(/<.*>/, '').trim());
+      for (const r of to.split(',')) {
+        const name = r.replace(/<.*>/, '').trim();
+        if (name) people.push(name);
       }
 
       emails.push({
         docId: row.s3_key,
-        subject: doc.subject || '(No subject)',
-        from: doc.from || '',
-        content: doc.body || '',
-        receivedAt: doc.receivedAt || '',
+        subject: subject || '(No subject)',
+        from: from || '',
+        content: body || '',
+        receivedAt: date || '',
         people: people.filter(Boolean),
       });
     }

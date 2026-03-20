@@ -137,6 +137,22 @@ export async function getDocument<T = unknown>(key: string): Promise<T | null> {
 }
 
 /**
+ * Read a document from S3 as raw text. Works for both .txt and .json files.
+ */
+export async function getDocumentText(key: string): Promise<string | null> {
+  const bucket = getBucket();
+  try {
+    const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const body = await response.Body?.transformToString();
+    return body ?? null;
+  } catch (err: unknown) {
+    const code = (err as { name?: string }).name;
+    if (code === 'NoSuchKey') return null;
+    throw err;
+  }
+}
+
+/**
  * Delete a document and its metadata sidecar from S3.
  */
 export async function deleteDocument(key: string): Promise<void> {

@@ -1,7 +1,7 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getDocument } from '@/lib/s3-client';
+import { getDocumentText } from '@/lib/s3-client';
 import { extractJson } from '@/lib/bedrock-llm';
 import { createTodo, listTodos } from '@/lib/todos';
 import { loadConfig } from '@/lib/config.node';
@@ -13,17 +13,6 @@ interface ExtractedTodo {
   description: string;
   priority: 'high' | 'medium' | 'low';
   dueDate?: string;
-}
-
-interface S3Doc {
-  type: string;
-  subject?: string;
-  from?: string;
-  to?: string[];
-  body?: string;
-  content?: string;
-  receivedAt?: string;
-  sentAt?: string;
 }
 
 function buildSystemPrompt(userName: string, userEmail: string): string {
@@ -109,18 +98,14 @@ export async function POST(request: NextRequest) {
     const docSummaries: Array<{ id: string; sourceType: string; text: string }> = [];
 
     for (const row of rows) {
-      const doc = await getDocument<S3Doc>(row.s3_key);
-      if (!doc) continue;
+      const raw = await getDocumentText(row.s3_key);
+      if (!raw) continue;
 
-      const subject = doc.subject ?? '';
-      const body = (doc.body ?? doc.content ?? '').slice(0, 500);
-      const from = doc.from ?? '';
-      const to = Array.isArray(doc.to) ? doc.to.join(', ') : '';
-
+      // Plain-text docs already have structured headers; use as-is (trimmed)
       docSummaries.push({
         id: row.s3_key,
         sourceType: row.source_type,
-        text: `[${row.source_type}] From: ${from}\nTo: ${to}\nSubject: ${subject}\n${body}`,
+        text: `[${row.source_type}] ${raw.slice(0, 800)}`,
       });
     }
 
