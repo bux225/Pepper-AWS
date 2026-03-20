@@ -49,6 +49,36 @@ export async function uploadDocument(
 }
 
 /**
+ * Upload a plain-text document with its Bedrock KB metadata sidecar to S3.
+ * Plain text produces better vector embeddings than JSON for KB retrieval.
+ */
+export async function uploadTextDocument(
+  key: string,
+  textContent: string,
+  metadata: object,
+): Promise<void> {
+  const bucket = getBucket();
+
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: textContent,
+    ContentType: 'text/plain; charset=utf-8',
+  }));
+
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: `${key}.metadata.json`,
+    Body: JSON.stringify({
+      metadataAttributes: metadata,
+    }),
+    ContentType: 'application/json',
+  }));
+
+  logger.debug({ key }, 'Uploaded text document to S3');
+}
+
+/**
  * List all object keys under a prefix.
  */
 export async function listKeys(prefix: string, maxKeys = 1000): Promise<string[]> {

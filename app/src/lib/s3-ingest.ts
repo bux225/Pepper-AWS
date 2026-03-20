@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { uploadDocument } from './s3-client';
+import { uploadDocument, uploadTextDocument } from './s3-client';
 import { startKbSync } from './bedrock-kb';
 import { getDb } from './db';
 import logger from './logger';
@@ -46,19 +46,19 @@ export async function ingestEmail(email: EmailDoc): Promise<string | null> {
   const contentHash = hashContent(`email:${email.messageId}:${email.body}`);
   if (isAlreadySynced(contentHash)) return null;
 
-  const s3Key = `emails/${email.messageId}.json`;
+  const s3Key = `emails/${email.messageId}.txt`;
   const people = [email.from, ...email.to.map(r => r.name)].filter(Boolean);
 
-  const content = {
-    type: 'email',
-    subject: email.subject,
-    from: `${email.from} <${email.fromEmail}>`,
-    to: email.to.map(r => `${r.name} <${r.email}>`),
-    body: email.body,
-    receivedAt: email.receivedAt,
-    conversationId: email.conversationId,
-    webLink: email.webLink,
-  };
+  // Plain text format for better KB vector embeddings and chunking
+  const toLine = email.to.map(r => `${r.name} <${r.email}>`).join(', ');
+  const textContent = [
+    `Subject: ${email.subject}`,
+    `From: ${email.from} <${email.fromEmail}>`,
+    `To: ${toLine}`,
+    `Date: ${email.receivedAt}`,
+    '',
+    email.body,
+  ].join('\n');
 
   const metadata: DocMetadata = {
     source: 'email',
@@ -70,7 +70,7 @@ export async function ingestEmail(email: EmailDoc): Promise<string | null> {
     conversationId: email.conversationId,
   };
 
-  await uploadDocument(s3Key, content, metadata);
+  await uploadTextDocument(s3Key, textContent, metadata);
   recordSync(contentHash, s3Key, 'email');
 
   logger.info({ messageId: email.messageId, subject: email.subject }, 'Ingested email to S3');
@@ -92,15 +92,15 @@ export async function ingestTeamsMessage(msg: TeamsMessageDoc): Promise<string |
   const contentHash = hashContent(`teams:${msg.chatId}:${msg.messageId}:${msg.body}`);
   if (isAlreadySynced(contentHash)) return null;
 
-  const s3Key = `teams/${msg.chatId}/${msg.messageId}.json`;
+  const s3Key = `teams/${msg.chatId}/${msg.messageId}.txt`;
 
-  const content = {
-    type: 'teams',
-    chatId: msg.chatId,
-    from: msg.from,
-    body: msg.body,
-    createdAt: msg.createdAt,
-  };
+  const textContent = [
+    `Teams Chat`,
+    `From: ${msg.from}`,
+    `Date: ${msg.createdAt}`,
+    '',
+    msg.body,
+  ].join('\n');
 
   const metadata: DocMetadata = {
     source: 'teams',
@@ -111,7 +111,7 @@ export async function ingestTeamsMessage(msg: TeamsMessageDoc): Promise<string |
     conversationId: msg.chatId,
   };
 
-  await uploadDocument(s3Key, content, metadata);
+  await uploadTextDocument(s3Key, textContent, metadata);
   recordSync(contentHash, s3Key, 'teams');
 
   logger.debug({ chatId: msg.chatId, messageId: msg.messageId }, 'Ingested Teams message to S3');
@@ -128,15 +128,16 @@ export interface NoteDoc {
 
 export async function ingestNote(note: NoteDoc): Promise<string> {
   const id = uuidv4();
-  const s3Key = `notes/${id}.json`;
+  const s3Key = `notes/${id}.txt`;
   const now = new Date().toISOString();
 
-  const content = {
-    type: 'note',
-    title: note.title,
-    content: note.content,
-    createdAt: now,
-  };
+  const textContent = [
+    `Note: ${note.title}`,
+    `Date: ${now}`,
+    ...(note.tags?.length ? [`Tags: ${note.tags.join(', ')}`] : []),
+    '',
+    note.content,
+  ].join('\n');
 
   const metadata: DocMetadata = {
     source: 'note',
@@ -146,7 +147,7 @@ export async function ingestNote(note: NoteDoc): Promise<string> {
     tags: note.tags,
   };
 
-  await uploadDocument(s3Key, content, metadata);
+  await uploadTextDocument(s3Key, textContent, metadata);
   recordSync(hashContent(`note:${id}:${note.content}`), s3Key, 'note');
 
   logger.info({ title: note.title }, 'Ingested note to S3');

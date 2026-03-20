@@ -1,8 +1,25 @@
 import * as cheerio from 'cheerio';
 
 /**
+ * Decode Outlook Safe Links back to their original URLs.
+ * Safe Links wrap real URLs: https://*.safelinks.protection.outlook.com/?url=ENCODED&data=...
+ */
+function decodeSafeLink(href: string): string {
+  if (!href.includes('safelinks.protection.outlook.com')) return href;
+  try {
+    const url = new URL(href);
+    const realUrl = url.searchParams.get('url');
+    return realUrl ? decodeURIComponent(realUrl) : href;
+  } catch {
+    // Fallback regex extraction
+    const match = href.match(/[?&]url=([^&]+)/);
+    return match ? decodeURIComponent(match[1]) : href;
+  }
+}
+
+/**
  * Convert HTML into readable plain text.
- * Uses cheerio for robust parsing. Preserves URLs from <a> tags.
+ * Uses cheerio for robust parsing. Decodes Outlook Safe Links.
  */
 export function htmlToText(html: string): string {
   try {
@@ -11,10 +28,12 @@ export function htmlToText(html: string): string {
 
     $('a[href]').each((_, el) => {
       const $el = $(el);
-      const href = $el.attr('href') ?? '';
+      const rawHref = $el.attr('href') ?? '';
+      const href = decodeSafeLink(rawHref);
       const text = $el.text().trim();
+      // Only include URL if it adds value beyond the link text
       if (href.startsWith('http') && text !== href && !text.includes(href)) {
-        $el.text(`${text} ${href} `);
+        $el.text(`${text} (${href}) `);
       } else if (href.startsWith('http')) {
         $el.text(`${text} `);
       }
@@ -34,7 +53,10 @@ export function htmlToText(html: string): string {
       .trim();
   } catch {
     return html
-      .replace(/<a[^>]+href="(https?:\/\/[^"]+)"[^>]*>(.*?)<\/a>/gi, '$2 $1 ')
+      // Decode safe links in href attributes before extracting
+      .replace(/href="https?:\/\/[^"]*safelinks\.protection\.outlook\.com[^"]*[?&]url=([^&"]+)[^"]*"/gi,
+        (_, encodedUrl) => `href="${decodeURIComponent(encodedUrl)}"`)
+      .replace(/<a[^>]+href="(https?:\/\/[^"]+)"[^>]*>(.*?)<\/a>/gi, '$2 ($1) ')
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/p>/gi, '\n')
       .replace(/<[^>]+>/g, ' ')

@@ -74,7 +74,7 @@ async function handleSearchKnowledge(params: Record<string, string>): Promise<st
         const results = await retrieveFromKb(kb.kbId, args.query, { topK: Math.min(topK, 5) });
         return results.map(r => ({
           source: kb.name,
-          content: r.content.slice(0, 2000),
+          content: r.content.slice(0, 4000),
           location: r.location,
           score: r.score,
         }));
@@ -89,7 +89,7 @@ async function handleSearchKnowledge(params: Record<string, string>): Promise<st
 
   return JSON.stringify({
     results: mainResults.map(r => ({
-      content: r.content.slice(0, 2000),
+      content: r.content.slice(0, 4000),
       location: r.location,
       score: r.score,
     })),

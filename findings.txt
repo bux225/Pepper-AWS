@@ -1,47 +1,9 @@
+# Clear old JSON docs + reset watermarks
+curl -X POST http://localhost:3000/api/ingest/reingest -H 'Content-Type: application/json' -d '{"source":"all"}'
 
+# Then trigger email + teams polls to re-ingest with new format
+curl -X POST http://localhost:3000/api/poll/email -H 'X-Pepper-Internal: 1'
+curl -X POST http://localhost:3000/api/poll/teams -H 'X-Pepper-Internal: 1'
 
-
-
-what was the last email Ben Sandefur sent to me
-Based on the available information, the last email from Ben Sandefur was sent on Tuesday, March 3, 2026 at 3:03 PM. However, the search results only show partial email headers and don't contain the complete subject line or body content of his most recent email. The emails appear to be related to DAV convention sponsorship discussions.
-weird.  Can you show everything you received about that email
-Here's exactly what I received from the search results about Ben Sandefur's email:
-
-Search Result 1:
-``
-url=https%3A%2F%2Fwww.dav.org%2Fmembership%2Fjoin-dav%2F&data=05%7C02%7CMatt.Soltis%40bd.com%7Cb9126da1500a4191680608de8067313b%7C94c3e67c9e2d4800a6b7635d97882165%7C0%7C0%7C639089378165398112%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ZHXaNBjJjI6SODadtUrt4AZNa1JK6hYZNu6bQ0Cy%2BbA%3D&reserved=0 
-
-From: Ben Sandefur <Ben.Sandefur@bd.com>
-Sent: Tuesday, March 3, 2026 3:03 PM
-To: Matthew S.
-`
-
-**Search Result 2:**
-`
-url=https%3A%2F%2Fwww.dav.org%2Fmembership%2Fjoin-dav%2F&data=05%7C02%7CMatt.Soltis%40bd.com%7C161bee6f68584fbae65a08de8064bde5%7C94c3e67c9e2d4800a6b7635d97882165%7C0%7C0%7C639089367380063323%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=B2HCJjjEAb3PQbOc%2FCDBV%2F8yMEmCETwP%2Bgc6FK3Smls%3D&reserved=0 
-
-From: Ben Sandefur <Ben.Sandefur@bd.com>
-Sent: Tuesday, March 3, 2026 3:03
-``
-
-Search Results 3-5: Similar fragments showing the same header information with slight variations, all from Ben Sandefur on March 3, 2026 at 3:03 PM to "Matthew S."
-
-That's literally all the information available in the search results. The data appears to be fragmented email headers with encoded URLs (likely from Outlook safe links) but no actual email subject line or body content is preserved in your knowledge base for Ben Sandefur's last email.
-Wait, march 3rd isn't the last time he emailed me.  There's one on March 18 at 7:34 my time
-You're absolutely right - I apologize for the error. However, I'm unable to find the March 18th email at 7:34 from Ben Sandefur in your knowledge base. All the search results are still showing only emails from March 3, 2026 at 3:03 PM. 
-
-It's possible that:
-1. The March 18th email hasn't been indexed in your knowledge base yet
-2. The search terms aren't matching the way that email was stored
-3. There might be an indexing delay
-
-Could you provide any additional details about the March 18th email (like subject line or keywords from the content) that might help me find it?
-In the body, he says this exactly "Can you discuss with Ryan?"
-I'm unable to find an email from Ben Sandefur containing the phrase "Can you discuss with Ryan?" in your knowledge base. Even with this specific quote, the search results are not returning the March 18th email you're referencing.
-
-The search is only finding:
-- The fragmented March 3rd email headers 
-- Some other emails from Ben where he mentions connecting with "@Alex" about career/talent programs
-- Various DAV convention-related emails
-
-It appears that the March 18th email at 7:34 with the "Can you discuss with Ryan?" content either hasn't been indexed in your knowledge base or there may be a search indexing issue preventing it from being found.
+# Then sync KB
+curl -X POST http://localhost:3000/api/ingest/analyze -H 'X-Pepper-Internal: 1'

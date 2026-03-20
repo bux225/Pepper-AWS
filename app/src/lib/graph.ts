@@ -90,13 +90,19 @@ export async function fetchEmails(
   if (deltaLink) {
     const token = await getAccessToken(account);
     const res = await fetch(deltaLink, {
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Prefer: 'outlook.body-content-type="text"',
+      },
     });
     if (!res.ok) throw new Error(`Graph delta ${res.status}`);
     response = await res.json() as GraphEmailResponse;
   } else {
-    const path = '/me/mailFolders/inbox/messages?$select=subject,bodyPreview,body,from,toRecipients,receivedDateTime,webLink,isRead,conversationId&$orderby=receivedDateTime desc&$top=100';
-    const res = await graphFetch(account, path);
+    const path = '/me/mailFolders/inbox/messages?$select=subject,bodyPreview,body,from,toRecipients,receivedDateTime,webLink,isRead,conversationId&$orderby=receivedDateTime desc&$top=1000';
+    const res = await graphFetch(account, path, {
+      headers: { Prefer: 'outlook.body-content-type="text"' },
+    });
     response = await res.json() as GraphEmailResponse;
   }
 
@@ -110,7 +116,11 @@ export async function fetchEmails(
     while (nextLink) {
       const token = await getAccessToken(account);
       const pageRes = await fetch(nextLink, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Prefer: 'outlook.body-content-type="text"',
+        },
       });
       if (!pageRes.ok) break;
       const page = await pageRes.json() as GraphEmailResponse;
