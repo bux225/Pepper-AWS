@@ -13,7 +13,7 @@ export async function GET() {
     const db = getDb();
 
     const lastIngest = (db.prepare(
-      `SELECT MAX(uploaded_at) as ts FROM sync_journal WHERE source_type IN ('email', 'teams')`
+      `SELECT MAX(uploaded_at) as ts FROM sync_journal WHERE source_type IN ('email', 'teams', 'note')`
     ).get() as { ts: string | null } | undefined)?.ts ?? null;
 
     const lastTodoScan = (db.prepare(
@@ -23,7 +23,7 @@ export async function GET() {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 7);
     const docs7d = (db.prepare(
-      `SELECT COUNT(*) as cnt FROM sync_journal WHERE source_type IN ('email', 'teams') AND uploaded_at >= ?`
+      `SELECT COUNT(*) as cnt FROM sync_journal WHERE source_type IN ('email', 'teams', 'note') AND uploaded_at >= ?`
     ).get(cutoff.toISOString()) as { cnt: number })?.cnt ?? 0;
 
     return NextResponse.json({
