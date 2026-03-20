@@ -17,6 +17,45 @@ function getBucket(): string {
 }
 
 /**
+ * Sanitize metadata for Bedrock KB sidecar files.
+ * - Strips empty arrays and undefined/null values (rejected as invalid attributes)
+ * - Truncates string arrays so the total sidecar stays under 1024 bytes
+ */
+function sanitizeMetadata(metadata: object): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(metadata)) {
+    if (v === undefined || v === null) continue;
+    if (Array.isArray(v) && v.length === 0) continue;
+    clean[k] = v;
+  }
+
+  // Bedrock KB rejects metadata sidecars > 1024 bytes.
+  // Progressively trim the longest array until we fit.
+  const MAX_BYTES = 1000; // leave headroom for the wrapper
+  while (JSON.stringify({ metadataAttributes: clean }).length > MAX_BYTES) {
+    let longestKey = '';
+    let longestLen = 0;
+    for (const [k, v] of Object.entries(clean)) {
+      if (Array.isArray(v) && v.length > longestLen) {
+        longestLen = v.length;
+        longestKey = k;
+      }
+    }
+    if (!longestKey || longestLen <= 1) {
+      // Nothing left to trim — drop entire arrays if still too big
+      for (const [k, v] of Object.entries(clean)) {
+        if (Array.isArray(v)) { delete clean[k]; break; }
+      }
+      if (JSON.stringify({ metadataAttributes: clean }).length > MAX_BYTES) break;
+    } else {
+      (clean[longestKey] as unknown[]).length = Math.max(1, Math.floor(longestLen / 2));
+    }
+  }
+
+  return clean;
+}
+
+/**
  * Upload a JSON document and its Bedrock KB metadata sidecar to S3.
  */
 export async function uploadDocument(
@@ -40,7 +79,7 @@ export async function uploadDocument(
     Bucket: bucket,
     Key: `${key}.metadata.json`,
     Body: JSON.stringify({
-      metadataAttributes: metadata,
+      metadataAttributes: sanitizeMetadata(metadata),
     }),
     ContentType: 'application/json',
   }));
@@ -70,7 +109,7 @@ export async function uploadTextDocument(
     Bucket: bucket,
     Key: `${key}.metadata.json`,
     Body: JSON.stringify({
-      metadataAttributes: metadata,
+      metadataAttributes: sanitizeMetadata(metadata),
     }),
     ContentType: 'application/json',
   }));
