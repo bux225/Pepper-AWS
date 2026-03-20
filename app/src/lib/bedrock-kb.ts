@@ -33,16 +33,25 @@ function getDataSourceId(): string {
 // === Ingestion (sync S3 → KB) ===
 
 export async function startKbSync(): Promise<string> {
-  const response = await agentClient.send(new StartIngestionJobCommand({
-    knowledgeBaseId: getKbId(),
-    dataSourceId: getDataSourceId(),
-  }));
+  try {
+    const response = await agentClient.send(new StartIngestionJobCommand({
+      knowledgeBaseId: getKbId(),
+      dataSourceId: getDataSourceId(),
+    }));
 
-  const jobId = response.ingestionJob?.ingestionJobId;
-  if (!jobId) throw new Error('Failed to start KB ingestion job');
+    const jobId = response.ingestionJob?.ingestionJobId;
+    if (!jobId) throw new Error('Failed to start KB ingestion job');
 
-  logger.info({ jobId }, 'Started KB ingestion sync');
-  return jobId;
+    logger.info({ jobId }, 'Started KB ingestion sync');
+    return jobId;
+  } catch (err: unknown) {
+    // If a sync is already running, log and return a placeholder instead of crashing
+    if (err && typeof err === 'object' && 'name' in err && err.name === 'ConflictException') {
+      logger.info('KB sync already in progress, skipping');
+      return 'ALREADY_RUNNING';
+    }
+    throw err;
+  }
 }
 
 export async function getKbSyncStatus(jobId: string): Promise<string> {

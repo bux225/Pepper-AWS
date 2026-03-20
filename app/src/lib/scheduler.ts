@@ -68,10 +68,6 @@ export function startScheduler(): void {
   tasks.push(cron.schedule('*/30 * * * *', () => { triggerPoll('/api/import/edge-history'); }));
   log.info('Scheduled Edge history sync every 30 minutes');
 
-  // File sync — every 10 minutes
-  tasks.push(cron.schedule('*/10 * * * *', () => { triggerPoll('/api/poll/files'); }));
-  log.info('Scheduled file sync every 10 minutes');
-
   // Ingestion analysis — every 10 minutes
   tasks.push(cron.schedule('*/10 * * * *', () => { triggerPoll('/api/ingest/analyze'); }));
   log.info('Scheduled ingestion analysis every 10 minutes');
