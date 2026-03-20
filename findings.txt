@@ -1,9 +1,2 @@
-# Clear old JSON docs + reset watermarks
-curl -X POST http://localhost:3000/api/ingest/reingest -H 'Content-Type: application/json' -d '{"source":"all"}'
-
-# Then trigger email + teams polls to re-ingest with new format
-curl -X POST http://localhost:3000/api/poll/email -H 'X-Pepper-Internal: 1'
-curl -X POST http://localhost:3000/api/poll/teams -H 'X-Pepper-Internal: 1'
-
-# Then sync KB
-curl -X POST http://localhost:3000/api/ingest/analyze -H 'X-Pepper-Internal: 1'
+Make a way to move a follow up to a todo and a todo to a follow up
+On the daily digest, when I hit generate the summary should say the day(s) that were summarized
