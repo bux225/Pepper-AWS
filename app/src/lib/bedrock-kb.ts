@@ -33,6 +33,10 @@ function getDataSourceId(): string {
 // === Ingestion (sync S3 → KB) ===
 
 export async function startKbSync(): Promise<string> {
+  return startKbSyncWithRetry(0);
+}
+
+async function startKbSyncWithRetry(attempt: number): Promise<string> {
   try {
     const response = await agentClient.send(new StartIngestionJobCommand({
       knowledgeBaseId: getKbId(),
@@ -45,9 +49,14 @@ export async function startKbSync(): Promise<string> {
     logger.info({ jobId }, 'Started KB ingestion sync');
     return jobId;
   } catch (err: unknown) {
-    // If a sync is already running, log and return a placeholder instead of crashing
     if (err && typeof err === 'object' && 'name' in err && err.name === 'ConflictException') {
-      logger.info('KB sync already in progress, skipping');
+      if (attempt < 3) {
+        const delayMs = (attempt + 1) * 30_000; // 30s, 60s, 90s
+        logger.info({ attempt: attempt + 1, delayMs }, 'KB sync already in progress, will retry');
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        return startKbSyncWithRetry(attempt + 1);
+      }
+      logger.warn('KB sync conflict persisted after 3 retries, giving up');
       return 'ALREADY_RUNNING';
     }
     throw err;
