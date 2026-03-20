@@ -1,6 +1,7 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getTodoById, updateTodo, deleteTodo } from '@/lib/todos';
+import { createFollowUp } from '@/lib/follow-ups';
 import { updateTodoSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
@@ -25,6 +26,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   const { id } = await params;
   const body = await request.json();
+
+  // Convert todo to follow-up
+  if (body.action === 'convert_to_followup') {
+    const todo = getTodoById(id);
+    if (!todo) return NextResponse.json({ error: 'Todo not found' }, { status: 404 });
+
+    const followUpId = createFollowUp({
+      sourceDocId: todo.sourceDocId,
+      sourceType: (todo.sourceType === 'email' || todo.sourceType === 'teams') ? todo.sourceType : 'email',
+      direction: 'awaiting_reply',
+      contactName: '',
+      summary: todo.title,
+    });
+
+    updateTodo(id, { status: 'cancelled' });
+    return NextResponse.json({ converted: true, followUpId });
+  }
+
   const parsed = updateTodoSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });

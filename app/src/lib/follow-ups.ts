@@ -222,6 +222,23 @@ export function listFollowUps(options?: {
   }));
 }
 
+export function getFollowUpById(id: number): FollowUp | null {
+  const db = getDb();
+  const r = db.prepare('SELECT * FROM follow_ups WHERE id = ?').get(id) as {
+    id: number; source_doc_id: string; source_type: string; status: string;
+    direction: string; contact_name: string; contact_email: string | null;
+    summary: string; detected_at: string; stale_days: number;
+  } | undefined;
+  if (!r) return null;
+  return {
+    id: r.id, sourceDocId: r.source_doc_id,
+    sourceType: r.source_type as 'email' | 'teams',
+    status: r.status as FollowUpStatus, direction: r.direction as FollowUpDirection,
+    contactName: r.contact_name, contactEmail: r.contact_email ?? undefined,
+    summary: r.summary, detectedAt: r.detected_at, staleDays: r.stale_days,
+  };
+}
+
 export function updateFollowUpStatus(id: number, status: 'resolved' | 'dismissed'): boolean {
   const db = getDb();
   const result = db.prepare(
@@ -234,4 +251,27 @@ export function countFollowUps(status: FollowUpStatus = 'waiting'): number {
   const db = getDb();
   const row = db.prepare('SELECT COUNT(*) as count FROM follow_ups WHERE status = ?').get(status) as { count: number };
   return row.count;
+}
+
+export function createFollowUp(input: {
+  sourceDocId?: string;
+  sourceType: 'email' | 'teams';
+  direction: FollowUpDirection;
+  contactName: string;
+  contactEmail?: string;
+  summary: string;
+}): number {
+  const db = getDb();
+  const result = db.prepare(`
+    INSERT INTO follow_ups (source_doc_id, source_type, direction, contact_name, contact_email, summary, stale_days)
+    VALUES (?, ?, ?, ?, ?, ?, 0)
+  `).run(
+    input.sourceDocId ?? '',
+    input.sourceType,
+    input.direction,
+    input.contactName,
+    input.contactEmail ?? null,
+    input.summary,
+  );
+  return Number(result.lastInsertRowid);
 }

@@ -186,6 +186,18 @@ export default function TodoPanel() {
     } catch { /* silent */ }
   };
 
+  const convertToFollowUp = async (id: string) => {
+    try {
+      await fetch(`/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'convert_to_followup' }),
+      });
+      fetchTodos();
+      fetchSuggested();
+    } catch { /* silent */ }
+  };
+
   const scanNow = async () => {
     setScanning(true);
     try {
@@ -388,6 +400,13 @@ export default function TodoPanel() {
 
                 {/* Actions */}
                 <div className="flex flex-shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100">
+                  <button
+                    onClick={() => convertToFollowUp(todo.id)}
+                    className="rounded px-1 py-0.5 text-[11px] font-medium text-orange-500 hover:bg-orange-100 dark:text-orange-400 dark:hover:bg-orange-900/40"
+                    title="Move to Follow-ups"
+                  >
+                    → FU
+                  </button>
                   <button
                     onClick={() => { setEditingId(todo.id); setEditTitle(todo.title); }}
                     className="rounded p-1 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"

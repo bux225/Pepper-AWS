@@ -13,6 +13,7 @@ interface DigestData {
     todosOpen: number;
     todosDone: number;
   };
+  dateRange?: { from: string; to: string };
   highlights: Array<{
     s3Key: string;
     title: string;
@@ -142,7 +143,21 @@ export default function DigestPanel() {
 
           {/* Summary */}
           <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
-            <h3 className="mb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">Summary</h3>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Summary</h3>
+              {digest.dateRange?.from && (
+                <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                  {(() => {
+                    const from = new Date(digest.dateRange.from);
+                    const to = new Date(digest.dateRange.to);
+                    const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    return from.toDateString() === to.toDateString()
+                      ? fmt(to)
+                      : `${fmt(from)} – ${fmt(to)}`;
+                  })()}
+                </span>
+              )}
+            </div>
             <div className="prose prose-sm prose-zinc dark:prose-invert max-w-none whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
               {digest.summary}
             </div>

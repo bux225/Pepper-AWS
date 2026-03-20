@@ -1,6 +1,7 @@
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
-import { detectEmailFollowUps, listFollowUps, updateFollowUpStatus, countFollowUps } from '@/lib/follow-ups';
+import { detectEmailFollowUps, listFollowUps, updateFollowUpStatus, countFollowUps, getFollowUpById } from '@/lib/follow-ups';
+import { createTodo } from '@/lib/todos';
 import { getDb } from '@/lib/db';
 import { getDocumentText } from '@/lib/s3-client';
 import { rateLimit } from '@/lib/rate-limit';
@@ -104,10 +105,31 @@ export async function PATCH(request: NextRequest) {
   if (limited) return limited;
 
   const body = await request.json();
-  const { id, status } = body as { id: number; status: 'resolved' | 'dismissed' };
+  const { id, status, action } = body as { id: number; status?: 'resolved' | 'dismissed'; action?: string };
 
-  if (!id || !status || !['resolved', 'dismissed'].includes(status)) {
-    return NextResponse.json({ error: 'id and status (resolved|dismissed) required' }, { status: 400 });
+  if (!id) {
+    return NextResponse.json({ error: 'id required' }, { status: 400 });
+  }
+
+  // Convert follow-up to todo
+  if (action === 'convert_to_todo') {
+    const fu = getFollowUpById(id);
+    if (!fu) return NextResponse.json({ error: 'Follow-up not found' }, { status: 404 });
+
+    const todo = createTodo({
+      title: fu.summary,
+      description: `${fu.direction === 'awaiting_reply' ? 'Waiting for reply from' : 'Needs response to'} ${fu.contactName}`,
+      priority: fu.staleDays >= 5 ? 'high' : fu.staleDays >= 3 ? 'medium' : 'low',
+      sourceDocId: fu.sourceDocId,
+      sourceType: fu.sourceType,
+    });
+
+    updateFollowUpStatus(id, 'resolved');
+    return NextResponse.json({ converted: true, todoId: todo.id });
+  }
+
+  if (!status || !['resolved', 'dismissed'].includes(status)) {
+    return NextResponse.json({ error: 'status (resolved|dismissed) or action required' }, { status: 400 });
   }
 
   const updated = updateFollowUpStatus(id, status);

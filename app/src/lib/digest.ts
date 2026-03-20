@@ -18,6 +18,7 @@ export interface DigestStats {
 export interface DigestResult {
   summary: string;
   stats: DigestStats;
+  dateRange: { from: string; to: string };
   createdAt?: string;
 }
 
@@ -74,7 +75,7 @@ export async function generateDigest(daysBack = 1): Promise<DigestResult> {
     summary = await generateSummary(stats, daysBack);
   }
 
-  return { summary, stats };
+  return { summary, stats, dateRange: { from: cutoffISO, to: new Date().toISOString() } };
 }
 
 async function generateSummary(stats: DigestStats, daysBack: number): Promise<string> {
@@ -142,6 +143,7 @@ export function getLatestDigest(daysBack?: number): DigestResult | null {
   return {
     summary: row.summary,
     stats: JSON.parse(row.stats_json),
+    dateRange: { from: '', to: '' },
     createdAt: row.created_at,
   };
 }

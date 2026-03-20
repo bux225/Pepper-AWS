@@ -64,6 +64,17 @@ export default function FollowUpPanel() {
     } catch { /* silent */ }
   };
 
+  const convertToTodo = async (id: number) => {
+    try {
+      await fetch('/api/follow-ups', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'convert_to_todo' }),
+      });
+      fetchFollowUps();
+    } catch { /* silent */ }
+  };
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
@@ -151,6 +162,13 @@ export default function FollowUpPanel() {
                 </div>
                 {filter === 'waiting' && (
                   <div className="flex flex-shrink-0 items-center gap-1">
+                    <button
+                      onClick={() => convertToTodo(fu.id)}
+                      className="rounded px-1.5 py-1 text-[11px] font-medium text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/40"
+                      title="Move to Todos"
+                    >
+                      → Todo
+                    </button>
                     <button
                       onClick={() => updateStatus(fu.id, 'resolved')}
                       className="rounded p-1.5 text-emerald-600 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
